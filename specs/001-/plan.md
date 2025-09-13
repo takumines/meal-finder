@@ -1,7 +1,7 @@
 # Implementation Plan: 食事決定アプリ (MealFinder)
 
-**Branch**: `001-` | **Date**: 2025-09-13 | **Spec**: `/Users/takumines/dev/React/nantaberu/specs/001-/spec.md`
-**Input**: Feature specification from `/Users/takumines/dev/React/nantaberu/specs/001-/spec.md`
+**Branch**: `001-` | **Date**: 2025-09-13 | **Spec**: /Users/takumines/dev/React/nantaberu/specs/001-/spec.md
+**Input**: Feature specification from /Users/takumines/dev/React/nantaberu/specs/001-/spec.md
 
 ## Execution Flow (/plan command scope)
 ```
@@ -28,48 +28,41 @@
 - Phase 2: /tasks command creates tasks.md
 - Phase 3-4: Implementation execution (manual or via tools)
 
-## Summary（初期フェーズMVP重視）
+## Summary
 
 **主要要件**: アキネーター形式のYes/No質問で食べたいものを効率的に見つける食事決定アプリ。ユーザー登録必須、最大10問の質問でユーザーの好みを特定し、具体的な料理を推薦。Tinder風UIで直感的な操作を提供。
 
-**技術アプローチ（Supabase統合）**: 
-- **認証・DB**: Supabase (Auth + PostgreSQL + Realtime)
-- **フロントエンド**: React 19.1.1 + Waku (RSC) + TypeScript + Tailwind CSS
-- **状態管理**: Zustand + Supabase Realtime（リアルタイム同期）
-- **外部API統合**: OpenAI GPT-4o mini（質問生成・推薦）+ Supabase Edge Functions
-- **アーキテクチャ**: ライブラリファーストアプローチ（supabase-client, meal-finder-core, meal-history）
-- **セキュリティ**: Row Level Security (RLS) + Supabase JWT
-- **テスト**: TDD（Contract → Integration → E2E → Unit順序）
-- **パフォーマンス**: 2秒以内レスポンス、80%以上の10問内解決率、リアルタイム同期
-
-**将来フェーズ**:
-- アクションオプション（レストラン検索・レシピ・デリバリー）
-- 学習機能（履歴分析・質問精度向上）
-- ソーシャルログイン・2FA認証
+**技術アプローチ**: 
+- **フレームワーク**: Next.js 15 (App Router) + TypeScript
+- **認証・DB**: Supabase (Auth + PostgreSQL) + Prisma ORM
+- **AI**: OpenAI GPT-4 (質問生成・料理推薦)
+- **UI**: React 19 + Tailwind CSS (モバイル最適化)
+- **アーキテクチャ**: フルスタック、サーバーサイドAPI処理
+- **パフォーマンス**: 2秒以内レスポンス、80%以上の10問内解決率
 
 ## Technical Context
-**Language/Version**: TypeScript 5.9.2, React 19.1.1, Node.js ESNext  
-**Primary Dependencies**: Waku 0.26.0 (React SSR/SSG), Tailwind CSS 4.1.12, React Server Components  
-**Storage**: LocalStorage (ユーザー設定・履歴), 外部API (AI質問生成・レストラン情報・認証)  
-**Testing**: Vitest (推定), React Testing Library (推定), E2Eテスト (Playwright推定)  
-**Target Platform**: モバイルWeb (iOS/Android Safari, Chrome), PWA対応  
-**Project Type**: web - フロントエンドのみ (外部API連携)  
-**Performance Goals**: 質問表示から回答完了まで2秒以内レスポンス、10問以内80%解決率  
-**Constraints**: オフライン時基本機能提供、モバイル最適化UI/UX、5回No制限  
-**Scale/Scope**: 個人ユーザー向け、10問質問システム、3アクションオプション
+**Language/Version**: TypeScript 5.x, Node.js 18+, React 19, Next.js 15  
+**Primary Dependencies**: Next.js 15, Supabase, Prisma, OpenAI SDK, Tailwind CSS  
+**Storage**: Supabase PostgreSQL, Prisma ORM  
+**Testing**: Vitest, React Testing Library, Playwright (E2E)  
+**Target Platform**: Web (モバイル最適化), PWA対応
+**Project Type**: web - フロントエンド + バックエンドAPI  
+**Performance Goals**: <2秒質問レスポンス, 80%解決率, Lighthouse 90+  
+**Constraints**: モバイル最適化必須, オフライン基本機能対応, 5回No制限  
+**Scale/Scope**: 個人ユーザー向け, 10問質問システム, 3アクションオプション
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 **Simplicity**:
-- Projects: 1 (フロントエンドWebアプリのみ) ✅
-- Using framework directly? (React/Waku直接利用、wrapper classes不要) ✅
-- Single data model? (統一されたユーザー・質問・料理・履歴モデル) ✅
-- Avoiding patterns? (Repository/UoW不要、単純なState管理) ✅
+- Projects: 1 (Next.js フルスタックアプリのみ) ✅
+- Using framework directly? (Next.js/React直接利用、wrapper無し) ✅
+- Single data model? (Prismaスキーマ統一、DTO不要) ✅
+- Avoiding patterns? (Repository/UoW無し、Prisma直接利用) ✅
 
 **Architecture**:
-- EVERY feature as library? (質問生成・料理推薦・履歴管理をライブラリ化) ✅
-- Libraries listed: [meal-finder-core (質問ロジック), meal-history (履歴管理), meal-recommendation (推薦エンジン)]
+- EVERY feature as library? (質問生成、料理推薦、履歴管理をライブラリ化) ✅
+- Libraries listed: [meal-finder-core (質問ロジック), meal-recommendation (推薦エンジン), meal-history (履歴管理)]
 - CLI per library: [dev用のcliコマンド --help/--version/--format対応] ✅
 - Library docs: llms.txt format planned? ✅
 
@@ -77,13 +70,13 @@
 - RED-GREEN-Refactor cycle enforced? (テスト先行開発必須) ✅
 - Git commits show tests before implementation? ✅
 - Order: Contract→Integration→E2E→Unit strictly followed? ✅
-- Real dependencies used? (LocalStorage、実際の外部API) ✅
-- Integration tests for: 外部API連携、質問フロー、履歴保存 ✅
+- Real dependencies used? (実際のSupabase、OpenAI API) ✅
+- Integration tests for: API統合、認証フロー、質問セッション ✅
 - FORBIDDEN: Implementation before test, skipping RED phase ✅
 
 **Observability**:
 - Structured logging included? (ユーザーアクション・エラー・パフォーマンス) ✅
-- Frontend logs → backend? (外部ログサービス連携予定) ⚠️
+- Frontend logs → backend? (Next.js API経由でログ統合) ✅
 - Error context sufficient? (エラー原因・ユーザーコンテキスト記録) ✅
 
 **Versioning**:
@@ -199,107 +192,64 @@ ios/ or android/
 ## Phase 2: Task Planning Approach
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
-**Task Generation Strategy** (初期フェーズMVP重視):
-0. **Infrastructure & Security Foundation** (P0 - Critical Missing Items):
-   - GitHub Actions CI/CD パイプライン構築 [P]
-   - Sentry エラー監視統合 [P] 
-   - 環境変数・API Key 保護実装 [P]
-   - Rate Limiting クライアント実装 [P]
-   - LocalStorage暗号化ライブラリ [P]
-   - XSS/CSRFプロテクション実装 [P]
+**Task Generation Strategy**:
+- Next.js 15アプリケーション基盤構築
+- Supabase + Prisma統合
+- OpenAI API統合
+- TDD原則: Contract → Integration → E2E → Unit順序
 
-1. **Supabase Integration Tests** (認証・DB・リアルタイム):
-   - Supabase Auth integration (signUp, signIn, signOut) [P]
-   - RLS policies validation (user_profiles, question_sessions, meal_history) [P]
-   - Supabase Realtime subscription tests [P]
-   - Database migration + seed data setup [P]
+**主要タスクカテゴリ**:
+1. **基盤構築** (P0 Critical)
+   - Next.js 15 + TypeScript + Tailwind CSS セットアップ
+   - Supabase プロジェクト作成・設定
+   - Prisma スキーマ定義・マイグレーション
+   - 環境変数・セキュリティ設定
 
-2. **Contract Tests** (from `/contracts/api-spec.yaml` - カスタムAPIのみ):
-   - `/api/ai/generate-question` → AI質問生成 test [P]
-   - `/api/ai/generate-recommendation` → AI推薦生成 test [P]
-   
-3. **Supabase Client Operations Tests**:
-   - user_profiles CRUD operations with RLS [P]
-   - question_sessions CRUD operations with RLS [P]
-   - answers CRUD operations with RLS [P]
-   - meal_recommendations CRUD operations with RLS [P]
-   - meal_history CRUD operations with RLS [P]
+2. **Contract Tests** (各API endpoint → 1テストタスク)
+   - `/api/auth/profile` contract test [P]
+   - `/api/sessions` contract test [P]
+   - `/api/ai/questions` contract test [P]
+   - `/api/ai/recommendations` contract test [P]
+   - `/api/meals/history` contract test [P]
 
-4. **Integration Tests** (Supabase統合フロー):
-   - Supabase Auth → プロファイル作成 → 初回質問フロー
-   - 質問セッション → リアルタイム同期 → 回答記録フロー
-   - 推薦生成 → 履歴保存 → リアルタイム更新フロー
-   - オフライン → オンライン復旧 → データ同期フロー
-   - 複数デバイス → リアルタイム同期フロー
+3. **Integration Tests** (Supabase/OpenAI統合)
+   - Supabase認証統合テスト
+   - Prisma データベース操作テスト  
+   - OpenAI API統合テスト
+   - リアルタイム機能テスト
 
-5. **Library Implementation Tasks** (Supabase統合):
-   - `supabase-client` library (認証・DB・Realtime wrapper)
-   - `meal-finder-core` library (AI質問生成・推薦ロジック)
-   - `meal-history` library (Supabase履歴管理・同期)
-   - `offline-sync` library (オフライン対応・競合解決)
+4. **Core Implementation** (ビジネスロジック)
+   - ユーザープロファイル管理 (src/features/auth/)
+   - 質問セッション管理 (src/features/questions/)
+   - AI推薦エンジン (src/features/recommendations/)
+   - 食事履歴管理 (src/features/history/)
 
-6. **UI Component Implementation** (Supabase統合):
-   - AuthProvider component (Supabase Auth Context)
-   - RealtimeProvider component (Supabase Realtime Context)
-   - UserProfile component (Supabase CRUD操作)
-   - QuestionFlow component (Supabase session管理)
-   - RecommendationResult component (Supabase履歴連携)
-   - HistoryList component (Supabaseリアルタイム更新)
+5. **UI Components** (モバイル最適化)
+   - 認証フォーム (AuthProvider, LoginForm)
+   - 質問フロー (QuestionFlow, AnswerButtons)
+   - 推薦結果 (RecommendationResult)
+   - 履歴表示 (MealHistory)
 
-**Ordering Strategy** (Supabase統合対応):
-- **Phase A**: Infrastructure & Security Foundation (P0 Critical Items)
-- **Phase B**: Supabase Setup → Database Migration → RLS Policies (基盤)
-- **Phase C**: Supabase Client Library → Core Business Logic (TDD Red phase)
-- **Phase D**: AI API Integration → Custom Endpoints (TDD Green phase)
-- **Phase E**: UI Components → Realtime Integration (TDD Refactor phase)
-- **Phase F**: E2E tests → Performance optimization → Release preparation
-- [P] marker for parallel execution within phases
+**Ordering Strategy**:
+- Phase A: 基盤構築 (Next.js, Supabase, Prisma)
+- Phase B: Contract Tests (全API endpoint)
+- Phase C: Integration Tests (外部API統合)
+- Phase D: Core Implementation (ビジネスロジック)
+- Phase E: UI Components (フロントエンド)
+- Phase F: E2E Tests (ユーザーフロー検証)
 
-**Dependency Chain** (Supabase統合):
+**Dependency Chain**:
 ```
-Infrastructure → Supabase Setup → RLS Policies → Supabase Client → AI APIs → UI Components → E2E → Operations
-       ↓            ↓               ↓              ↓            ↓         ↓            ↓      ↓
-    CI/CD      DB Migration    Auth Tests    Client Tests  API Tests  Component Tests  Tests  Monitoring
+Supabase Setup → Prisma Schema → Contract Tests → Integration Tests → Core Logic → UI Components → E2E Tests
 ```
 
-**Supabase特有の追加フェーズ**:
-- Database Schema Migration
-- Row Level Security Policy設定
-- Supabase Realtime Subscription設定
-- Edge Functions デプロイ（AI API用）
+**Constitutional Compliance**:
+- EVERY implementation task has corresponding failing test FIRST
+- Libraries: meal-finder-core, meal-recommendation, meal-history
+- CLI commands per library: --help, --version, --format
+- RED-GREEN-Refactor cycle strictly enforced
 
-**Critical Addition - Operations & Monitoring Tasks**:
-6. **Operations & Monitoring** (P1 - High Priority):
-   - Lighthouse CI パフォーマンス監視 [P]
-   - Google Analytics 4 統合 [P]
-   - API使用量監視ダッシュボード [P]
-   - オフライン同期競合解決ロジック
-   - データマイグレーション手順書
-   - アクセシビリティテスト自動化
-
-7. **Release Preparation** (P2 - Medium Priority):
-   - 本番環境構築・テスト
-   - 運用手順書・緊急対応訓練
-   - ユーザーサポート体制準備
-   - 多言語対応（i18n）実装
-   - パフォーマンス回帰テスト
-
-**Estimated Output**: 45-55 numbered, ordered tasks in tasks.md (increased due to operations tasks)
-
-**Task Template Pattern**:
-```
-## Task N: [Component] - [Action]
-**Type**: [Contract|Model|Library|UI|Integration|E2E]
-**Priority**: [P] or sequential
-**Dependencies**: Task M, Task K
-**Acceptance Criteria**: 
-- [ ] Test written and failing (RED)
-- [ ] Implementation passes test (GREEN)  
-- [ ] Code refactored for quality (REFACTOR)
-**Files Modified**: 
-- tests/[...].test.ts
-- src/[...].ts
-```
+**Estimated Output**: 35-40 numbered, ordered tasks in tasks.md
 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
@@ -323,27 +273,18 @@ Infrastructure → Supabase Setup → RLS Policies → Supabase Client → AI AP
 *This checklist is updated during execution flow*
 
 **Phase Status**:
-- [x] Phase 0: Research complete (/plan command)
-- [x] Phase 1: Design complete (/plan command)
-- [x] Phase 2: Task planning complete (/plan command - describe approach only)
+- [x] Phase 0: Research complete (/plan command) - research.md exists
+- [x] Phase 1: Design complete (/plan command) - data-model.md, contracts/, quickstart.md exist
+- [x] Phase 2: Task planning complete (/plan command - describe approach only) - Strategy documented
 - [ ] Phase 3: Tasks generated (/tasks command)
 - [ ] Phase 4: Implementation complete
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-- [x] Initial Constitution Check: PASS
-- [x] Post-Design Constitution Check: PASS
-- [x] All NEEDS CLARIFICATION resolved
-- [x] Complexity deviations documented (none required)
-
-**Artifacts Generated**:
-- [x] `/specs/001-/plan.md` - このファイル
-- [x] `/specs/001-/research.md` - 技術調査・意思決定
-- [x] `/specs/001-/data-model.md` - エンティティ・リレーション定義
-- [x] `/specs/001-/contracts/api-spec.yaml` - API仕様（OpenAPI）
-- [x] `/specs/001-/quickstart.md` - 開発環境セットアップ
-
-**Ready for Next Command**: `/tasks` (タスク生成フェーズ)
+- [x] Initial Constitution Check: PASS - All principles verified
+- [x] Post-Design Constitution Check: PASS - Design maintains constitutional compliance
+- [x] All NEEDS CLARIFICATION resolved - research.md addresses all unknowns
+- [x] Complexity deviations documented - No violations requiring justification
 
 ---
 *Based on Constitution v2.1.1 - See `/memory/constitution.md`*
