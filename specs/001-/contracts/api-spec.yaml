@@ -1,0 +1,791 @@
+openapi: 3.0.3
+info:
+  title: MealFinder API - Supabase統合
+  description: 食事決定アプリのAPI仕様（Supabase + カスタムAPI）
+  version: 0.1.0
+  contact:
+    name: MealFinder Team
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://nantaberu.vercel.app/api
+    description: Production server
+
+# Supabase統合では以下のようにAPIが分散
+# 1. Supabase Auth: 認証関連（@supabase/auth-ui-react）
+# 2. Supabase DB: CRUD操作（Supabaseクライアント）
+# 3. カスタムAPI: AI質問生成、複雑なロジック
+
+paths:
+  # AI質問生成（Supabase Edge Functions または カスタムAPI）
+  /ai/generate-question:
+    post:
+      summary: AI質問生成
+      description: OpenAI APIを使用して動的質問を生成
+      security:
+        - supabaseAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                userProfile:
+                  $ref: '#/components/schemas/UserProfile'
+                previousAnswers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Answer'
+                timeOfDay:
+                  $ref: '#/components/schemas/TimeSlot'
+                location:
+                  $ref: '#/components/schemas/Location'
+              required:
+                - sessionId
+                - userProfile
+                - timeOfDay
+      responses:
+        '200':
+          description: 質問生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 料理推薦生成
+  /ai/generate-recommendation:
+    post:
+      summary: 料理推薦生成
+      description: 質問回答を分析して料理を推薦
+      security:
+        - supabaseAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+                  format: uuid
+                userProfile:
+                  $ref: '#/components/schemas/UserProfile'
+                answers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Answer'
+              required:
+                - sessionId
+                - userProfile
+                - answers
+      responses:
+        '200':
+          description: 推薦生成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealRecommendation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 注: 以下のCRUD操作はSupabaseクライアントから直接実行
+  # - ユーザープロファイル管理: supabase.from('user_profiles')
+  # - セッション管理: supabase.from('question_sessions') 
+  # - 回答記録: supabase.from('answers')
+  # - 履歴管理: supabase.from('meal_history')
+  # - 認証: supabase.auth (signUp, signIn, signOut等)
+    get:
+      summary: ユーザープロファイル取得
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: プロファイル情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      summary: ユーザープロファイル更新
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 質問セッション管理
+  /sessions:
+    post:
+      summary: 新しい質問セッション開始
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeOfDay:
+                  $ref: '#/components/schemas/TimeSlot'
+                location:
+                  $ref: '#/components/schemas/Location'
+              required:
+                - timeOfDay
+      responses:
+        '201':
+          description: セッション作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSession'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /sessions/{sessionId}:
+    get:
+      summary: セッション情報取得
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: セッション情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSession'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 質問・回答
+  /sessions/{sessionId}/questions/next:
+    get:
+      summary: 次の質問を取得
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 次の質問
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Question'
+                  - $ref: '#/components/schemas/MealRecommendation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /sessions/{sessionId}/answers:
+    post:
+      summary: 質問への回答を送信
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questionId:
+                  type: string
+                  format: uuid
+                response:
+                  type: boolean
+                responseTime:
+                  type: number
+                  description: 回答時間（ミリ秒）
+              required:
+                - questionId
+                - response
+                - responseTime
+      responses:
+        '201':
+          description: 回答記録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 料理推薦反応（初期フェーズ：シンプル）
+  /recommendations/{recommendationId}/reaction:
+    post:
+      summary: 推薦結果への反応記録
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: recommendationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reaction:
+                  type: string
+                  enum: ['liked', 'disliked', 'saved']
+              required:
+                - reaction
+      responses:
+        '200':
+          description: 反応記録成功
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # 履歴管理
+  /history:
+    get:
+      summary: 食事履歴取得
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 食事履歴一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MealHistory'
+                  total:
+                    type: integer
+                  hasMore:
+                    type: boolean
+
+    post:
+      summary: 手動で食事履歴を追加
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mealName:
+                  type: string
+                cuisineGenre:
+                  $ref: '#/components/schemas/CuisineGenre'
+                consumedAt:
+                  type: string
+                  format: date-time
+                satisfaction:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+              required:
+                - mealName
+                - cuisineGenre
+                - consumedAt
+      responses:
+        '201':
+          description: 履歴追加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealHistory'
+
+components:
+  securitySchemes:
+    supabaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT Token
+
+  schemas:
+    # Supabase統合スキーマ
+    SupabaseUser:
+      type: object
+      description: Supabase Auth User（読み取り専用）
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        email_confirmed_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - created_at
+        - updated_at
+
+    UserProfile:
+      type: object
+      description: Supabase user_profiles テーブル
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: auth.users.id FK
+        preferred_genres:
+          type: array
+          items:
+            $ref: '#/components/schemas/CuisineGenre'
+          minItems: 1
+          maxItems: 5
+        allergies:
+          type: array
+          items:
+            type: string
+          default: []
+        spice_preference:
+          $ref: '#/components/schemas/SpiceLevel'
+        budget_range:
+          $ref: '#/components/schemas/BudgetRange'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - preferred_genres
+        - spice_preference
+        - budget_range
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        preferredGenres:
+          type: array
+          items:
+            $ref: '#/components/schemas/CuisineGenre'
+        allergies:
+          type: array
+          items:
+            type: string
+        spicePreference:
+          $ref: '#/components/schemas/SpiceLevel'
+        budgetRange:
+          $ref: '#/components/schemas/BudgetRange'
+
+    QuestionSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/SessionStatus'
+        timeOfDay:
+          $ref: '#/components/schemas/TimeSlot'
+        location:
+          $ref: '#/components/schemas/Location'
+        totalQuestions:
+          type: integer
+          minimum: 0
+          maximum: 10
+        noAnswerCount:
+          type: integer
+          minimum: 0
+          maximum: 5
+        currentQuestionIndex:
+          type: integer
+          minimum: 0
+          maximum: 9
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+        recommendation:
+          $ref: '#/components/schemas/MealRecommendation'
+      required:
+        - id
+        - userId
+        - startedAt
+        - status
+        - timeOfDay
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        category:
+          $ref: '#/components/schemas/QuestionCategory'
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 10
+        isSystemQuestion:
+          type: boolean
+        questionIndex:
+          type: integer
+          description: セッション内での質問順序
+      required:
+        - id
+        - text
+        - category
+        - questionIndex
+
+    Answer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        questionId:
+          type: string
+          format: uuid
+        response:
+          type: boolean
+        responseTime:
+          type: number
+        questionIndex:
+          type: integer
+        answeredAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - questionId
+        - response
+        - responseTime
+        - questionIndex
+        - answeredAt
+
+    MealRecommendation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        mealName:
+          type: string
+        description:
+          type: string
+        cuisineGenre:
+          $ref: '#/components/schemas/CuisineGenre'
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        reasoningSteps:
+          type: array
+          items:
+            type: string
+        userReaction:
+          type: string
+          enum: ['liked', 'disliked', 'saved']
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - mealName
+        - description
+        - cuisineGenre
+        - confidence
+        - actionOptions
+        - createdAt
+
+
+    MealHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        mealName:
+          type: string
+        cuisineGenre:
+          $ref: '#/components/schemas/CuisineGenre'
+        consumedAt:
+          type: string
+          format: date-time
+        sessionId:
+          type: string
+          format: uuid
+        source:
+          $ref: '#/components/schemas/MealSource'
+        satisfaction:
+          type: integer
+          minimum: 1
+          maximum: 5
+        wouldRecommendAgain:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - mealName
+        - cuisineGenre
+        - consumedAt
+        - source
+        - createdAt
+
+
+    # Enum Types
+    CuisineGenre:
+      type: string
+      enum:
+        - japanese
+        - chinese
+        - korean
+        - italian
+        - french
+        - american
+        - indian
+        - thai
+        - mexican
+        - other
+
+    SpiceLevel:
+      type: string
+      enum:
+        - none
+        - mild
+        - medium
+        - hot
+        - very_hot
+
+    BudgetRange:
+      type: string
+      enum:
+        - budget
+        - moderate
+        - premium
+        - luxury
+
+    TimeSlot:
+      type: string
+      enum:
+        - breakfast
+        - lunch
+        - dinner
+        - snack
+
+    SessionStatus:
+      type: string
+      enum:
+        - in_progress
+        - completed
+        - abandoned
+
+    QuestionCategory:
+      type: string
+      enum:
+        - mood
+        - genre
+        - cooking
+        - situation
+        - time
+        - preference
+
+    MealSource:
+      type: string
+      enum:
+        - recommendation
+        - manual_entry
+
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        prefecture:
+          type: string
+        city:
+          type: string
+      required:
+        - latitude
+        - longitude
+
+  responses:
+    BadRequest:
+      description: リクエストが不正です
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
+
+    Unauthorized:
+      description: 認証が必要です
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+              message:
+                type: string
+                example: "Authentication required"
+
+    NotFound:
+      description: リソースが見つかりません
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+
+    InternalServerError:
+      description: サーバー内部エラー
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
+              requestId:
+                type: string
