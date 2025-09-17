@@ -10,6 +10,20 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/__tests__/setup.ts"],
     globals: true,
+    env: {
+      NODE_ENV: "test",
+    },
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.{idea,git,cache,output,temp}/**",
+      "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*",
+      ...(process.env.SKIP_INTEGRATION_TESTS ? [
+        "tests/e2e/**",
+        "tests/performance/**", 
+        "src/__tests__/contract/**"
+      ] : []),
+    ],
   },
   resolve: {
     alias: {

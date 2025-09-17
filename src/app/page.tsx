@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useAuth } from "../features/auth/components/auth-provider";
-import { LoginForm } from "../features/auth/components/login-form";
+import { useAuth } from "@/features/auth/components/auth-provider";
+import { LoginForm } from "@/features/auth/components/login-form";
 
 export default function Home() {
   const { user, loading, signIn } = useAuth();

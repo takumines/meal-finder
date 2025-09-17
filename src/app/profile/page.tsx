@@ -1,13 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+
 import { useEffect, useState } from "react";
-import {
-  RequireAuth,
-  useAuth,
-} from "../../features/auth/components/auth-provider";
-import { LogoutButton } from "../../features/auth/components/login-form";
-import type { CuisineGenre, UserProfile } from "../../types/database";
+import { RequireAuth, useAuth } from "@/features/auth/components/auth-provider";
+import { LogoutButton } from "@/features/auth/components/login-form";
+import type {
+  BudgetRange,
+  CuisineGenre,
+  SpiceLevel,
+  UserProfile,
+} from "@/types/database";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -20,8 +23,8 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<Partial<UserProfile>>({
     preferred_genres: [],
     allergies: [],
-    spice_preference: "mild",
-    budget_range: "moderate",
+    spice_preference: "MILD",
+    budget_range: "MODERATE",
   });
 
   useEffect(() => {
@@ -29,8 +32,8 @@ export default function ProfilePage() {
       setFormData({
         preferred_genres: userProfile.preferred_genres || [],
         allergies: userProfile.allergies || [],
-        spice_preference: userProfile.spice_preference || "mild",
-        budget_range: userProfile.budget_range || "moderate",
+        spice_preference: userProfile.spice_preference || "MILD",
+        budget_range: userProfile.budget_range || "MODERATE",
       });
     }
   }, [userProfile]);
@@ -93,17 +96,17 @@ export default function ProfilePage() {
     setError(null);
   };
 
-  const genreOptions = [
-    { value: "japanese", label: "和食" },
-    { value: "chinese", label: "中華" },
-    { value: "korean", label: "韓国料理" },
-    { value: "italian", label: "イタリアン" },
-    { value: "french", label: "フレンチ" },
-    { value: "american", label: "アメリカン" },
-    { value: "indian", label: "インド料理" },
-    { value: "thai", label: "タイ料理" },
-    { value: "mexican", label: "メキシカン" },
-    { value: "other", label: "その他" },
+  const genreOptions: Array<{ value: CuisineGenre; label: string }> = [
+    { value: "JAPANESE", label: "和食" },
+    { value: "CHINESE", label: "中華" },
+    { value: "KOREAN", label: "韓国料理" },
+    { value: "ITALIAN", label: "イタリアン" },
+    { value: "FRENCH", label: "フレンチ" },
+    { value: "AMERICAN", label: "アメリカン" },
+    { value: "INDIAN", label: "インド料理" },
+    { value: "THAI", label: "タイ料理" },
+    { value: "MEXICAN", label: "メキシカン" },
+    { value: "OTHER", label: "その他" },
   ];
 
   const allergyOptions = [
@@ -118,19 +121,19 @@ export default function ProfilePage() {
     { value: "sesame", label: "ごま" },
   ];
 
-  const spiceOptions = [
-    { value: "none", label: "辛さなし" },
-    { value: "mild", label: "軽く辛い" },
-    { value: "medium", label: "普通辛い" },
-    { value: "hot", label: "辛い" },
-    { value: "very_hot", label: "とても辛い" },
+  const spiceOptions: Array<{ value: SpiceLevel; label: string }> = [
+    { value: "NONE", label: "辛さなし" },
+    { value: "MILD", label: "軽く辛い" },
+    { value: "MEDIUM", label: "普通辛い" },
+    { value: "HOT", label: "辛い" },
+    { value: "VERY_HOT", label: "とても辛い" },
   ];
 
-  const budgetOptions = [
-    { value: "budget", label: "〜500円" },
-    { value: "moderate", label: "500円〜1000円" },
-    { value: "premium", label: "1000円〜2000円" },
-    { value: "luxury", label: "2000円以上" },
+  const budgetOptions: Array<{ value: BudgetRange; label: string }> = [
+    { value: "BUDGET", label: "〜500円" },
+    { value: "MODERATE", label: "500円〜1000円" },
+    { value: "PREMIUM", label: "1000円〜2000円" },
+    { value: "LUXURY", label: "2000円以上" },
   ];
 
   return (
@@ -151,6 +154,7 @@ export default function ProfilePage() {
               <div className="flex space-x-3">
                 {!isEditing ? (
                   <button
+                    type="button"
                     onClick={() => setIsEditing(true)}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
@@ -188,10 +192,15 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="profile-email"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     メールアドレス
                   </label>
-                  <p className="text-gray-600 py-2">{user?.email}</p>
+                  <p id="profile-email" className="text-gray-600 py-2">
+                    {user?.email}
+                  </p>
                 </div>
               </div>
             </div>
@@ -205,22 +214,28 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 {/* 好きなジャンル */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label
+                    htmlFor="preferred-genres-group"
+                    className="block text-sm font-medium text-gray-700 mb-3"
+                  >
                     好きな料理のジャンル（複数選択可）
                   </label>
                   {isEditing ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div
+                      id="preferred-genres-group"
+                      className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                    >
                       {genreOptions.map((option) => (
                         <label key={option.value} className="flex items-center">
                           <input
                             type="checkbox"
                             checked={(formData.preferred_genres || []).includes(
-                              option.value as CuisineGenre,
+                              option.value,
                             )}
                             onChange={(e) =>
                               handleArrayChange(
                                 "preferred_genres",
-                                option.value as CuisineGenre,
+                                option.value,
                                 e.target.checked,
                               )
                             }
@@ -257,14 +272,25 @@ export default function ProfilePage() {
 
                 {/* 辛さの好み */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label
+                    htmlFor="spice-preference-group"
+                    className="block text-sm font-medium text-gray-700 mb-3"
+                  >
                     辛さの好み
                   </label>
                   {isEditing ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div
+                      id="spice-preference-group"
+                      className="grid grid-cols-2 md:grid-cols-4 gap-3"
+                    >
                       {spiceOptions.map((option) => (
-                        <label key={option.value} className="flex items-center">
+                        <label
+                          key={option.value}
+                          htmlFor={`spice-preference-${option.value}`}
+                          className="flex items-center"
+                        >
                           <input
+                            id={`spice-preference-${option.value}`}
                             type="radio"
                             name="spice_preference"
                             value={option.value}
@@ -294,14 +320,21 @@ export default function ProfilePage() {
 
                 {/* 予算の範囲 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label
+                    htmlFor="budget-range-group"
+                    className="block text-sm font-medium text-gray-700 mb-3"
+                  >
                     予算の範囲
                   </label>
                   {isEditing ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div
+                      id="budget-range-group"
+                      className="grid grid-cols-2 md:grid-cols-4 gap-3"
+                    >
                       {budgetOptions.map((option) => (
                         <label key={option.value} className="flex items-center">
                           <input
+                            id={`budget-range-${option.value}`}
                             type="radio"
                             name="budget_range"
                             value={option.value}
@@ -335,14 +368,15 @@ export default function ProfilePage() {
               </h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label htmlFor="allergies-group" className="block text-sm font-medium text-gray-700 mb-3">
                   アレルギー（複数選択可）
                 </label>
                 {isEditing ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div id="allergies-group" className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {allergyOptions.map((option) => (
-                      <label key={option.value} className="flex items-center">
+                      <label key={option.value} htmlFor={`allergy-${option.value}`} className="flex items-center">
                         <input
+                          id={`allergy-${option.value}`}
                           type="checkbox"
                           checked={(formData.allergies || []).includes(
                             option.value,

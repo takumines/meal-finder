@@ -1,15 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
-
-// モック
-vi.mock("../../lib/openai/client", () => ({
-  openai: {
-    chat: {
-      completions: {
-        create: vi.fn(),
-      },
-    },
-  },
-}));
+import { describe, expect, it } from "vitest";
 
 // モックデータ
 const mockRecommendation = {
@@ -38,7 +27,7 @@ const mockRequest = {
     preferred_genres: ["JAPANESE", "WESTERN"],
     allergies: ["peanuts", "shellfish"],
     spice_preference: "MILD",
-    budget_range: "MEDIUM",
+    budget_range: "MODERATE",
     created_at: new Date(),
     updated_at: new Date(),
   },
@@ -71,7 +60,7 @@ describe("Recommendation Service Functions - Simple Tests", () => {
       "../../features/meals/services/recommendation-service"
     );
 
-    const result = validatePrice(1500, "MEDIUM");
+    const result = validatePrice(1500, "MODERATE");
     expect(typeof result).toBe("number");
     expect(result).toBeGreaterThan(0);
   });
@@ -93,10 +82,10 @@ describe("Recommendation Service Functions - Simple Tests", () => {
       "../../features/meals/services/recommendation-service"
     );
 
-    const fitResult = checkBudgetFit(800, "MEDIUM");
+    const fitResult = checkBudgetFit(800, "MODERATE");
     expect(typeof fitResult).toBe("boolean");
 
-    const overbudgetResult = checkBudgetFit(3000, "LOW");
+    const overbudgetResult = checkBudgetFit(3000, "BUDGET");
     expect(overbudgetResult).toBe(false);
   });
 

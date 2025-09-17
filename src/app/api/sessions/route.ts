@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma/client";
-import { createClient } from "../../../lib/supabase/server";
-import type { TimeSlot } from "../../../types/database";
+import { prisma } from "@/lib/prisma";
+import { createServerClient } from "@/lib/supabase";
+import type { TimeSlot } from "@/types";
 
 interface CreateSessionRequest {
   time_of_day: TimeSlot;
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   console.log("hogehogehoge");
   try {
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,
@@ -46,16 +46,16 @@ export async function POST(request: NextRequest) {
 
     // time_of_dayの値を検証
     const validTimeSlots: TimeSlot[] = [
-      "breakfast",
-      "lunch",
-      "dinner",
-      "snack",
+      "BREAKFAST",
+      "LUNCH",
+      "DINNER",
+      "SNACK",
     ];
     if (!validTimeSlots.includes(time_of_day)) {
       return NextResponse.json(
         {
           error:
-            "Invalid time_of_day. Must be one of: breakfast, lunch, dinner, snack",
+            "Invalid time_of_day. Must be one of: BREAKFAST, LUNCH, DINNER, SNACK",
         },
         { status: 400 },
       );
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         time_of_day,
         location: location ? JSON.stringify(location) : Prisma.JsonNull,
-        status: "in_progress",
+        status: "ACTIVE",
       },
     });
 
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,

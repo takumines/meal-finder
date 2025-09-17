@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "./auth-provider";
+import { useAuth } from "@/features/auth/components/auth-provider";
 
 interface LoginFormProps {
   onSuccess?: () => void;

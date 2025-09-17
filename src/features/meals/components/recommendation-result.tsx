@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { MealRecommendation } from "../../../types/database";
+import type { MealRecommendation } from "@/types/database";
 
 interface RecommendationResultProps {
   recommendation: MealRecommendation;

@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { describe, expect, it } from "vitest";
-import { supabase } from "../lib/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 describe("Setup Validation", () => {
   it("should have valid Prisma client", () => {
@@ -18,7 +18,7 @@ describe("Setup Validation", () => {
   it("should have valid OpenAI client structure", async () => {
     // Dynamic import to avoid browser environment issues
     try {
-      const { openai } = await import("../lib/openai/client");
+      const { openai } = await import("@/lib/openai");
       expect(typeof openai).toBe("object");
       expect(openai).toBeDefined();
     } catch (error) {

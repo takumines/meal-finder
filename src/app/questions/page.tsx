@@ -5,10 +5,10 @@ import { Suspense, useEffect, useState } from "react";
 import {
   RequireAuth,
   useAuth,
-} from "../../features/auth/components/auth-provider";
-import { RecommendationResult } from "../../features/meals/components/recommendation-result";
-import { QuestionFlow } from "../../features/questions/components/question-flow";
-import type { MealRecommendation } from "../../types/database";
+} from "@/features/auth/components/auth-provider";
+import { RecommendationResult } from "@/features/meals/components/recommendation-result";
+import { QuestionFlow } from "@/features/questions/components/question-flow";
+import type { MealRecommendation } from "@/types/database";
 
 // SearchParamsを使用するコンポーネントを分離
 function QuestionsPageContent({
@@ -172,6 +172,7 @@ export default function QuestionsPage() {
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
+                      <title>エラーアイコン</title>
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -182,6 +183,7 @@ export default function QuestionsPage() {
                   <div className="ml-3">
                     <p>{error}</p>
                     <button
+                      type="button"
                       onClick={handleNewSession}
                       className="mt-2 text-red-600 hover:text-red-800 font-medium"
                     >
@@ -220,18 +222,21 @@ export default function QuestionsPage() {
                   </h3>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
+                      type="button"
                       onClick={handleNewSession}
                       className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                       別の提案を受ける
                     </button>
                     <button
+                      type="button"
                       onClick={() => router.push("/history")}
                       className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >
                       履歴を見る
                     </button>
                     <button
+                      type="button"
                       onClick={() => router.push("/profile")}
                       className="bg-gray-200 text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                     >

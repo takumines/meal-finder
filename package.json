@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
+    "test:unit": "vitest src/__tests__/unit --run",
+    "test:all": "vitest --run"
   },
   "dependencies": {
     "@prisma/client": "^6.16.1",

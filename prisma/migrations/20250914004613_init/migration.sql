@@ -8,7 +8,7 @@ CREATE TYPE "public"."SpiceLevel" AS ENUM ('none', 'mild', 'medium', 'hot', 'ver
 CREATE TYPE "public"."BudgetRange" AS ENUM ('budget', 'moderate', 'premium', 'luxury');
 
 -- CreateEnum
-CREATE TYPE "public"."TimeSlot" AS ENUM ('breakfast', 'lunch', 'dinner', 'snack');
+CREATE TYPE "public"."TimeSlot" AS ENUM ('BREAKFAST', 'LUNCH', 'DINNER', 'SNACK');
 
 -- CreateEnum
 CREATE TYPE "public"."SessionStatus" AS ENUM ('in_progress', 'completed', 'abandoned');

@@ -1,11 +1,8 @@
-import { supabase } from "../../../lib/supabase/client";
+import { supabase } from "@/lib/supabase";
 import type {
   MealHistory,
-  MealHistoryResponse,
-  MealRecommendation,
-  QuestionSession,
-  UserProfile,
-} from "../../../types/database";
+  MealHistoryResponse
+} from "@/types";
 
 // Types
 export interface CreateHistoryRequest {

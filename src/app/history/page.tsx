@@ -5,13 +5,13 @@ import { useState } from "react";
 import {
   RequireAuth,
   useAuth,
-} from "../../features/auth/components/auth-provider";
+} from "@/features/auth/components/auth-provider";
 import {
   MealHistory,
   MealHistoryStats,
-} from "../../features/meals/components/meal-history";
-import { RecommendationResult } from "../../features/meals/components/recommendation-result";
-import type { MealRecommendation } from "../../types/database";
+} from "@/features/meals/components/meal-history";
+import { RecommendationResult } from "@/features/meals/components/recommendation-result";
+import type { MealRecommendation } from "@/types/database";
 
 export default function HistoryPage() {
   const router = useRouter();

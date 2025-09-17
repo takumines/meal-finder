@@ -1,15 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
-
-// 最小限のモック
-vi.mock("../../lib/openai/client", () => ({
-  openai: {
-    chat: {
-      completions: {
-        create: vi.fn(),
-      },
-    },
-  },
-}));
+import { describe, expect, it } from "vitest";
 
 describe("Question Service Functions - Simple Tests", () => {
   it("should handle basic categorization", async () => {

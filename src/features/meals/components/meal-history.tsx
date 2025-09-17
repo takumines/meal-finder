@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { MealHistory, MealRecommendation } from "../../../types/database";
-import { useAuth } from "../../auth/components/auth-provider";
+import { useAuth } from "@/features/auth/components/auth-provider";
+import type { MealHistory, MealRecommendation } from "@/types/database";
 
 interface MealHistoryProps {
   limit?: number;

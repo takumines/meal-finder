@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../../lib/prisma/client";
-import { createClient } from "../../../../../lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { createServerClient } from "@/lib/supabase";
 import type {
   UserProfile,
   UserProfileUpdate,
-} from "../../../../../types/database";
+} from "@/types";
 
 interface RouteContext {
   params: Promise<{
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const params = await context.params;
 
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
           id: params.userId,
           preferred_genres: [],
           allergies: [],
-          spice_preference: "medium",
-          budget_range: "moderate",
+          spice_preference: "MEDIUM",
+          budget_range: "MODERATE",
         },
       });
 
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const params = await context.params;
 
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,
@@ -86,6 +86,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     // リクエストボディを取得
     const body: UserProfileUpdate = await request.json();
+    console.log(body);
 
     // 既存のプロファイルを確認
     const existingProfile = await prisma.userProfile.findUnique({
@@ -109,8 +110,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           id: params.userId,
           preferred_genres: body.preferred_genres || [],
           allergies: body.allergies || [],
-          spice_preference: body.spice_preference || "medium",
-          budget_range: body.budget_range || "moderate",
+          spice_preference: body.spice_preference || "MEDIUM",
+          budget_range: body.budget_range || "MODERATE",
         },
       });
     }
@@ -142,7 +143,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const params = await context.params;
 
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,

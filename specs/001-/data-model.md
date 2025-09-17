@@ -138,7 +138,7 @@ CREATE TABLE question_sessions (
   started_at TIMESTAMPTZ DEFAULT now(),
   completed_at TIMESTAMPTZ,
   status TEXT NOT NULL CHECK (status IN ('in_progress', 'completed', 'abandoned')) DEFAULT 'in_progress',
-  time_of_day TEXT NOT NULL CHECK (time_of_day IN ('breakfast', 'lunch', 'dinner', 'snack')),
+  time_of_day TEXT NOT NULL CHECK (time_of_day IN ('BREAKFAST', 'LUNCH', 'DINNER', 'SNACK')),
   location JSONB, -- {latitude: number, longitude: number, prefecture?: string, city?: string}
   total_questions INTEGER DEFAULT 0 CHECK (total_questions <= 10),
   no_answer_count INTEGER DEFAULT 0 CHECK (no_answer_count <= 5),
@@ -184,7 +184,7 @@ interface QuestionSession {
 
 type SessionStatus = 'in_progress' | 'completed' | 'abandoned';
 
-type TimeSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+type TimeSlot = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 
 interface Location {
   latitude: number;

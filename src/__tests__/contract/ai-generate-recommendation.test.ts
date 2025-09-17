@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { safeFetch } from "../helpers/fetch-helper";
 
 describe("POST /api/ai/generate-recommendation", () => {
   const validRequest = {
@@ -26,7 +27,7 @@ describe("POST /api/ai/generate-recommendation", () => {
   };
 
   it("should handle valid request", async () => {
-    const response = await fetch(
+    const response = await safeFetch(
       "http://localhost:3000/api/ai/generate-recommendation",
       {
         method: "POST",
@@ -45,7 +46,7 @@ describe("POST /api/ai/generate-recommendation", () => {
       userProfile: validRequest.userProfile,
     };
 
-    const response = await fetch(
+    const response = await safeFetch(
       "http://localhost:3000/api/ai/generate-recommendation",
       {
         method: "POST",
@@ -60,7 +61,7 @@ describe("POST /api/ai/generate-recommendation", () => {
   });
 
   it("should return proper response structure when implemented", async () => {
-    const response = await fetch(
+    const response = await safeFetch(
       "http://localhost:3000/api/ai/generate-recommendation",
       {
         method: "POST",
@@ -71,7 +72,7 @@ describe("POST /api/ai/generate-recommendation", () => {
       },
     );
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.json) {
       const data = await response.json();
       expect(data).toHaveProperty("id");
       expect(data).toHaveProperty("sessionId");

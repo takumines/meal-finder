@@ -1,14 +1,13 @@
-import { openai } from "../../../lib/openai/client";
+import { openai } from "@/lib/openai";
 import type {
   Answer,
   BudgetRange,
   CuisineGenre,
-  MealRecommendation,
   MealSource,
   SpiceLevel,
   TimeSlot,
   UserProfile,
-} from "../../../types/database";
+} from "@/types";
 
 // Types
 export interface RecommendationRequest {
@@ -54,10 +53,10 @@ export interface RecommendationFitEvaluation {
 
 // Constants
 const BUDGET_RANGES = {
-  LOW: { min: 0, max: 500 },
-  MEDIUM: { min: 500, max: 1000 },
-  HIGH: { min: 1000, max: 2000 },
-  PREMIUM: { min: 2000, max: 10000 },
+  BUDGET: { min: 0, max: 500 },
+  MODERATE: { min: 500, max: 1000 },
+  PREMIUM: { min: 1000, max: 2000 },
+  LUXURY: { min: 2000, max: 10000 },
 } as const;
 
 const BASE_CALORIES: Record<CuisineGenre, number> = {
@@ -84,7 +83,7 @@ const FALLBACK_OPTIONS: Record<
     instructions: string[];
   }
 > = {
-  breakfast: {
+  BREAKFAST: {
     name: "和風朝食セット",
     description: "ご飯、味噌汁、焼き魚の定番朝食",
     cuisine_genre: "JAPANESE",
@@ -92,7 +91,7 @@ const FALLBACK_OPTIONS: Record<
     ingredients: ["ご飯", "味噌", "魚", "野菜"],
     instructions: ["ご飯を炊く", "味噌汁を作る", "魚を焼く"],
   },
-  lunch: {
+  LUNCH: {
     name: "カレーライス",
     description: "野菜たっぷりのカレーライス",
     cuisine_genre: "AMERICAN",
@@ -100,7 +99,7 @@ const FALLBACK_OPTIONS: Record<
     ingredients: ["ご飯", "カレールー", "玉ねぎ", "にんじん", "じゃがいも"],
     instructions: ["野菜を切る", "炒める", "煮込む", "ご飯にかける"],
   },
-  dinner: {
+  DINNER: {
     name: "焼き魚定食",
     description: "魚の塩焼きと小鉢の定食",
     cuisine_genre: "JAPANESE",
@@ -108,7 +107,7 @@ const FALLBACK_OPTIONS: Record<
     ingredients: ["魚", "ご飯", "野菜", "味噌"],
     instructions: ["魚を焼く", "ご飯を炊く", "味噌汁を作る"],
   },
-  snack: {
+  SNACK: {
     name: "フルーツサラダ",
     description: "季節のフルーツを使ったサラダ",
     cuisine_genre: "OTHER",
@@ -300,7 +299,7 @@ export const generateFallbackRecommendation = (
   request: RecommendationRequest,
 ): GeneratedMealRecommendation => {
   const { userProfile, timeOfDay } = request;
-  const fallback = FALLBACK_OPTIONS[timeOfDay] || FALLBACK_OPTIONS.lunch;
+  const fallback = FALLBACK_OPTIONS[timeOfDay] || FALLBACK_OPTIONS.LUNCH;
 
   return {
     name: fallback.name,
@@ -351,10 +350,10 @@ export const checkBudgetFit = (
   budgetRange: BudgetRange,
 ): boolean => {
   const ranges = {
-    LOW: 500,
-    MEDIUM: 1000,
-    HIGH: 2000,
-    PREMIUM: 10000,
+    BUDGET: 500,
+    MODERATE: 1000,
+    PREMIUM: 2000,
+    LUXURY: 10000,
   };
 
   return price <= ranges[budgetRange];

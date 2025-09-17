@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type {
-  Answer,
-  Question,
-  QuestionSession,
-} from "../../../types/database";
-import { useAuth } from "../../auth/components/auth-provider";
+import { useAuth } from "@/features/auth/components/auth-provider";
+import type { Answer, Question, QuestionSession } from "@/types/database";
 
 interface Location {
   latitude: number;
@@ -121,7 +117,7 @@ export function QuestionFlow({
       });
 
       // セッションが完了している場合
-      if (session.status !== "in_progress") {
+      if (session.status !== "ACTIVE") {
         onComplete?.(sessionId);
         return;
       }
@@ -227,7 +223,7 @@ export function QuestionFlow({
         },
         credentials: "include",
         body: JSON.stringify({
-          status: "completed",
+          status: "COMPLETED",
           completed_at: new Date().toISOString(),
         }),
       });
@@ -267,9 +263,9 @@ export function QuestionFlow({
   // 時間帯の判定
   const getTimeOfDay = () => {
     const hour = new Date().getHours();
-    if (hour < 11) return "breakfast";
-    if (hour < 17) return "lunch";
-    return "dinner";
+    if (hour < 11) return "BREAKFAST";
+    if (hour < 17) return "LUNCH";
+    return "DINNER";
   };
 
   if (!user) {

@@ -1,5 +1,5 @@
 import type { AuthError, Session, User } from "@supabase/supabase-js";
-import { supabase } from "./client";
+import { supabase } from "@/lib/supabase/client";
 
 export interface AuthState {
   user: User | null;
@@ -290,7 +290,7 @@ export class AuthManager {
         preferred_genres: [],
         allergies: [],
         spice_preference: "MILD",
-        budget_range: "MEDIUM",
+        budget_range: "MODERATE",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });

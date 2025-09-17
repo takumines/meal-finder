@@ -15,58 +15,58 @@ datasource db {
 }
 
 enum CuisineGenre {
-  japanese
-  chinese
-  korean
-  italian
-  french
-  american
-  indian
-  thai
-  mexican
-  other
+  JAPANESE
+  CHINESE
+  KOREAN
+  ITALIAN
+  FRENCH
+  AMERICAN
+  INDIAN
+  THAI
+  MEXICAN
+  OTHER
 }
 
 enum SpiceLevel {
-  none
-  mild
-  medium
-  hot
-  very_hot
+  NONE
+  MILD
+  MEDIUM
+  HOT
+  VERY_HOT
 }
 
 enum BudgetRange {
-  budget
-  moderate
-  premium
-  luxury
+  BUDGET
+  MODERATE
+  PREMIUM
+  LUXURY
 }
 
 enum TimeSlot {
-  breakfast
-  lunch
-  dinner
-  snack
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
 }
 
 enum SessionStatus {
-  in_progress
-  completed
-  abandoned
+  ACTIVE
+  COMPLETED
+  ABANDONED
 }
 
 enum QuestionCategory {
-  mood
-  genre
-  cooking
-  situation
-  time
-  preference
+  MOOD
+  GENRE
+  COOKING
+  SITUATION
+  TIME
+  PREFERENCE
 }
 
 enum MealSource {
-  recommendation
-  manual_entry
+  RECOMMENDATION
+  MANUAL_ENTRY
 }
 
 model UserProfile {
@@ -90,7 +90,7 @@ model QuestionSession {
   user_id                String        @db.Uuid
   started_at             DateTime      @default(now())
   completed_at           DateTime?
-  status                 SessionStatus @default(in_progress)
+  status                 SessionStatus @default(ACTIVE)
   time_of_day            TimeSlot
   location               Json?
   total_questions        Int           @default(0)
@@ -149,7 +149,7 @@ model MealHistory {
   cuisine_genre CuisineGenre
   consumed_at   DateTime
   session_id    String?      @db.Uuid
-  source        MealSource   @default(recommendation)
+  source        MealSource   @default(RECOMMENDATION)
   satisfaction  Int?
   created_at    DateTime     @default(now())
 

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { safeFetch } from "../helpers/fetch-helper";
 
 describe("GET /api/sessions/{sessionId}/questions/next", () => {
   const sessionId = "550e8400-e29b-41d4-a716-446655440000";
 
   it("should return 404 when API endpoint does not exist yet", async () => {
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/sessions/${sessionId}/questions/next`,
       {
         method: "GET",
@@ -19,7 +20,7 @@ describe("GET /api/sessions/{sessionId}/questions/next", () => {
 
   it("should validate sessionId format when implemented", async () => {
     const invalidSessionId = "invalid-uuid";
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/sessions/${invalidSessionId}/questions/next`,
       {
         method: "GET",
@@ -33,7 +34,7 @@ describe("GET /api/sessions/{sessionId}/questions/next", () => {
   });
 
   it("should return question or recommendation when implemented", async () => {
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/sessions/${sessionId}/questions/next`,
       {
         method: "GET",
@@ -43,7 +44,7 @@ describe("GET /api/sessions/{sessionId}/questions/next", () => {
       },
     );
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.json) {
       const data = await response.json();
 
       if (data.text) {
@@ -69,7 +70,7 @@ describe("GET /api/sessions/{sessionId}/questions/next", () => {
       }
     }
 
-    if (response.status === 404) {
+    if (response.status === 404 && response.json) {
       const error = await response.json();
       expect(error).toHaveProperty("error");
       expect(error).toHaveProperty("message");

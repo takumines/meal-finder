@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { generateQuestion } from "../../../../../../features/questions/services/question-service";
-import { prisma } from "../../../../../../lib/prisma/client";
-import { createClient } from "../../../../../../lib/supabase/server";
+import { generateQuestion } from "@/features/questions/services/question-service";
+import { prisma } from "@/lib/prisma";
+import { createServerClient } from "@/lib/supabase";
 
 export async function GET(
   request: NextRequest,
@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,
@@ -47,7 +47,7 @@ export async function GET(
     }
 
     // セッションが非アクティブまたは完了している場合
-    if (session.status !== "in_progress" || session.completed_at) {
+    if (session.status !== "ACTIVE" || session.completed_at) {
       return NextResponse.json(
         { error: "Session is not active or already completed" },
         { status: 400 },

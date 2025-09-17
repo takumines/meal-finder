@@ -38,6 +38,99 @@
 4. **ライブラリラッパー**: `src/lib` でサードパーティライブラリをラップして使用
 5. **関数型アプローチ**: classベースではなく純粋関数による実装
 
+## ファイル管理とImport規約
+
+### Export管理規約
+
+各ディレクトリに `index.ts` ファイルを作成し、そのディレクトリ内のexportを一元管理します：
+
+```typescript
+// src/features/auth/components/index.ts
+export { AuthProvider } from './auth-provider'
+export { LoginForm } from './login-form'
+export type { AuthState, SignUpData } from './types'
+
+// src/features/auth/services/index.ts  
+export { authManager } from './auth-service'
+export type { AuthManager } from './auth-service'
+
+// src/features/auth/index.ts
+export * from './components'
+export * from './services'
+```
+
+### Import規約
+
+1. **絶対パス使用**: `@` から始まる絶対パスを使用
+2. **index.ts経由**: ディレクトリのindex.tsを経由してimport
+3. **Named Import推奨**: default exportは避けてnamed exportを使用
+
+```typescript
+// ✅ 推奨: 絶対パス + Named Import
+import { AuthProvider, LoginForm } from '@/features/auth'
+import { questionService } from '@/features/questions'
+import { supabase } from '@/lib/supabase'
+
+// ❌ 非推奨: 相対パス
+import { AuthProvider } from '../../../features/auth/components/auth-provider'
+
+// ❌ 非推奨: ファイル直接指定
+import { AuthProvider } from '@/features/auth/components/auth-provider'
+```
+
+### ディレクトリ別export構成
+
+```
+src/
+├── features/
+│   ├── auth/
+│   │   ├── index.ts      # auth機能のexport
+│   │   ├── components/
+│   │   │   └── index.ts  # authコンポーネントのexport
+│   │   └── services/
+│   │       └── index.ts  # authサービスのexport
+│   ├── meals/
+│   │   ├── index.ts
+│   │   ├── components/
+│   │   │   └── index.ts
+│   │   └── services/
+│   │       └── index.ts
+│   └── questions/
+│       ├── index.ts
+│       ├── components/
+│       │   └── index.ts
+│       └── services/
+│           └── index.ts
+├── lib/
+│   ├── supabase/
+│   │   └── index.ts      # supabase関連のexport
+│   ├── prisma/
+│   │   └── index.ts      # prisma関連のexport
+│   └── openai/
+│       └── index.ts      # openai関連のexport
+├── components/
+│   └── index.ts          # 共通コンポーネントのexport
+└── types/
+    └── index.ts          # 型定義のexport
+```
+
+### TypeScript設定 (tsconfig.json)
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/types/*": ["./src/types/*"]
+    }
+  }
+}
+```
+
 ## 実装例
 
 ### 1. Route Handler (ビジネスロジック無し)

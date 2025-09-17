@@ -691,10 +691,10 @@ components:
     TimeSlot:
       type: string
       enum:
-        - breakfast
-        - lunch
-        - dinner
-        - snack
+        - BREAKFAST
+        - LUNCH
+        - DINNER
+        - SNACK
 
     SessionStatus:
       type: string
@@ -750,7 +750,7 @@ components:
               summary: バリデーションエラー
               value:
                 error: "Missing required parameter: time_of_day"
-                message: "Invalid time_of_day. Must be one of: breakfast, lunch, dinner, snack"
+                message: "Invalid time_of_day. Must be one of: BREAKFAST, LUNCH, DINNER, SNACK"
             insufficient_answers:
               summary: 回答不足エラー
               value:

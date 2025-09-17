@@ -1,10 +1,10 @@
-import { openai } from "../../../lib/openai/client";
+import { openai } from "@/lib/openai";
 import type {
   Answer,
   QuestionCategory,
   TimeSlot,
   UserProfile,
-} from "../../../types/database";
+} from "@/types";
 
 // Types
 export interface Question {

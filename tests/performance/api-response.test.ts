@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { safeFetch } from "../../src/__tests__/helpers/fetch-helper";
 
 describe("Performance: API Response Times", () => {
   const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
@@ -11,7 +12,7 @@ describe("Performance: API Response Times", () => {
     preferred_genres: ["JAPANESE", "WESTERN"],
     allergies: ["peanuts"],
     spice_preference: "MILD",
-    budget_range: "MEDIUM",
+    budget_range: "MODERATE",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -26,12 +27,12 @@ describe("Performance: API Response Times", () => {
       sessionId: "perf-session-question",
       userProfile: testUserProfile,
       previousAnswers: [],
-      timeOfDay: "lunch" as const,
+      timeOfDay: "LUNCH" as const,
     };
 
     const startTime = performance.now();
 
-    const response = await fetch(`${baseUrl}/api/ai/generate-question`, {
+    const response = await safeFetch(`${baseUrl}/api/ai/generate-question`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +52,7 @@ describe("Performance: API Response Times", () => {
       expect(responseTime).toBeLessThan(PERFORMANCE_THRESHOLD);
 
       // レスポンス構造も検証
-      const data = await response.json();
+      const data = response.json ? await response.json() : {};
       expect(data).toHaveProperty("id");
       expect(data).toHaveProperty("text");
       expect(typeof data.text).toBe("string");
@@ -88,18 +89,21 @@ describe("Performance: API Response Times", () => {
           answered_at: new Date().toISOString(),
         },
       ],
-      timeOfDay: "lunch" as const,
+      timeOfDay: "LUNCH" as const,
     };
 
     const startTime = performance.now();
 
-    const response = await fetch(`${baseUrl}/api/ai/generate-recommendation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await safeFetch(
+      `${baseUrl}/api/ai/generate-recommendation`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestPayload),
       },
-      body: JSON.stringify(requestPayload),
-    });
+    );
 
     const endTime = performance.now();
     const responseTime = endTime - startTime;
@@ -112,7 +116,7 @@ describe("Performance: API Response Times", () => {
       expect(responseTime).toBeLessThan(PERFORMANCE_THRESHOLD);
 
       // レスポンス構造も検証
-      const data = await response.json();
+      const data = response.json ? await response.json() : {};
       expect(data).toHaveProperty("id");
       expect(data).toHaveProperty("sessionId");
     } else {
@@ -126,12 +130,12 @@ describe("Performance: API Response Times", () => {
   it("should handle session operations within performance threshold", async () => {
     const sessionPayload = {
       userProfile: testUserProfile,
-      timeOfDay: "lunch" as const,
+      timeOfDay: "LUNCH" as const,
     };
 
     const startTime = performance.now();
 
-    const response = await fetch(`${baseUrl}/api/sessions`, {
+    const response = await safeFetch(`${baseUrl}/api/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -147,19 +151,22 @@ describe("Performance: API Response Times", () => {
     if (response.status === 200 || response.status === 201) {
       expect(responseTime).toBeLessThan(PERFORMANCE_THRESHOLD);
 
-      const data = await response.json();
+      const data = response.json ? await response.json() : {};
       expect(data).toHaveProperty("id");
 
       // セッション取得のパフォーマンステスト
       const sessionId = data.id;
       const getStartTime = performance.now();
 
-      const getResponse = await fetch(`${baseUrl}/api/sessions/${sessionId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const getResponse = await safeFetch(
+        `${baseUrl}/api/sessions/${sessionId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       const getEndTime = performance.now();
       const getResponseTime = getEndTime - getStartTime;
@@ -189,7 +196,7 @@ describe("Performance: API Response Times", () => {
     const sessionId = "perf-test-session-answers";
     const startTime = performance.now();
 
-    const response = await fetch(
+    const response = await safeFetch(
       `${baseUrl}/api/sessions/${sessionId}/answers`,
       {
         method: "POST",
@@ -221,7 +228,7 @@ describe("Performance: API Response Times", () => {
     const sessionId = "perf-test-session-questions";
     const startTime = performance.now();
 
-    const response = await fetch(
+    const response = await safeFetch(
       `${baseUrl}/api/sessions/${sessionId}/questions/next`,
       {
         method: "GET",
@@ -241,7 +248,7 @@ describe("Performance: API Response Times", () => {
     if (response.status === 200) {
       expect(responseTime).toBeLessThan(PERFORMANCE_THRESHOLD);
 
-      const data = await response.json();
+      const data = response.json ? await response.json() : {};
       expect(data).toHaveProperty("id");
       expect(data).toHaveProperty("text");
     } else {
@@ -260,14 +267,14 @@ describe("Performance: API Response Times", () => {
       sessionId: "perf-concurrent-test",
       userProfile: testUserProfile,
       previousAnswers: [],
-      timeOfDay: "lunch" as const,
+      timeOfDay: "LUNCH" as const,
     };
 
     const startTime = performance.now();
 
     // 並行リクエストを作成
     for (let i = 0; i < concurrentRequests; i++) {
-      const request = fetch(`${baseUrl}/api/ai/generate-question`, {
+      const request = safeFetch(`${baseUrl}/api/ai/generate-question`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

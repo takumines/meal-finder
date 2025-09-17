@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { safeFetch } from "../helpers/fetch-helper";
 
 describe("GET /api/history", () => {
   it("should return 404 when API endpoint does not exist yet", async () => {
-    const response = await fetch("http://localhost:3000/api/history", {
+    const response = await safeFetch("http://localhost:3000/api/history", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -20,7 +21,7 @@ describe("GET /api/history", () => {
       endDate: "2024-12-31",
     });
 
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/history?${queryParams}`,
       {
         method: "GET",
@@ -39,7 +40,7 @@ describe("GET /api/history", () => {
       offset: "-1", // negative offset
     });
 
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/history?${invalidParams}`,
       {
         method: "GET",
@@ -53,14 +54,14 @@ describe("GET /api/history", () => {
   });
 
   it("should return proper response structure when implemented", async () => {
-    const response = await fetch("http://localhost:3000/api/history", {
+    const response = await safeFetch("http://localhost:3000/api/history", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.json) {
       const data = await response.json();
       expect(data).toHaveProperty("items");
       expect(data).toHaveProperty("total");

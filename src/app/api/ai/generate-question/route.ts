@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
-import type { GenerateQuestionParams } from "../../../../features/questions/services/question-service";
-import { generateQuestion } from "../../../../features/questions/services/question-service";
-import { createClient } from "../../../../lib/supabase/server";
+import type { GenerateQuestionParams } from "@/features/questions/services/question-service";
+import { generateQuestion } from "@/features/questions/services/question-service";
+import { createServerClient } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
     // 認証チェック
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const {
       data: { user },
       error: authError,

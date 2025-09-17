@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { safeFetch } from "../helpers/fetch-helper";
 
 describe("POST /api/recommendations/{recommendationId}/reaction", () => {
   const recommendationId = "550e8400-e29b-41d4-a716-446655440000";
@@ -7,7 +8,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
   };
 
   it("should return 404 when API endpoint does not exist yet", async () => {
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
       {
         method: "POST",
@@ -24,7 +25,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
   it("should validate required fields when implemented", async () => {
     const invalidRequest = {};
 
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
       {
         method: "POST",
@@ -40,7 +41,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
 
   it("should validate recommendationId format when implemented", async () => {
     const invalidRecommendationId = "invalid-uuid";
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/recommendations/${invalidRecommendationId}/reaction`,
       {
         method: "POST",
@@ -59,7 +60,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
       reaction: "invalid_reaction",
     };
 
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
       {
         method: "POST",
@@ -76,7 +77,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
   it("should accept valid reaction values when implemented", async () => {
     const reaction = "liked"; // Test with one value to avoid timeout
     const request = { reaction };
-    const response = await fetch(
+    const response = await safeFetch(
       `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
       {
         method: "POST",

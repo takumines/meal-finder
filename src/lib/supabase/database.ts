@@ -1,15 +1,14 @@
+import { supabase } from "@/lib/supabase/client";
 import type {
   Answer,
   CreateAnswerRequest,
   CreateQuestionSessionRequest,
-  Location,
   MealHistory,
   MealRecommendation,
   QuestionSession,
   UserProfile,
   UserProfileUpdate,
-} from "../../types/database";
-import { supabase } from "./client";
+} from "@/types/database";
 
 export interface DatabaseError {
   message: string;
@@ -53,7 +52,7 @@ export class DatabaseManager {
           preferred_genres: profile.preferred_genres || [],
           allergies: profile.allergies || [],
           spice_preference: profile.spice_preference || "MILD",
-          budget_range: profile.budget_range || "MEDIUM",
+          budget_range: profile.budget_range || "MODERATE",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
