@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum CuisineGenre {
+  japanese
+  chinese
+  korean
+  italian
+  french
+  american
+  indian
+  thai
+  mexican
+  other
+}
+
+enum SpiceLevel {
+  none
+  mild
+  medium
+  hot
+  very_hot
+}
+
+enum BudgetRange {
+  budget
+  moderate
+  premium
+  luxury
+}
+
+enum TimeSlot {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+enum SessionStatus {
+  in_progress
+  completed
+  abandoned
+}
+
+enum QuestionCategory {
+  mood
+  genre
+  cooking
+  situation
+  time
+  preference
+}
+
+enum MealSource {
+  recommendation
+  manual_entry
+}
+
+model UserProfile {
+  id               String         @id @db.Uuid
+  preferred_genres CuisineGenre[]
+  allergies        String[]       @default([])
+  spice_preference SpiceLevel
+  budget_range     BudgetRange
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  // Relations
+  question_sessions QuestionSession[]
+  meal_history      MealHistory[]
+
+  @@map("user_profiles")
+}
+
+model QuestionSession {
+  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                String        @db.Uuid
+  started_at             DateTime      @default(now())
+  completed_at           DateTime?
+  status                 SessionStatus @default(in_progress)
+  time_of_day            TimeSlot
+  location               Json?
+  total_questions        Int           @default(0)
+  no_answer_count        Int           @default(0)
+  current_question_index Int           @default(0)
+  created_at             DateTime      @default(now())
+  updated_at             DateTime      @updatedAt
+
+  // Relations
+  user_profile        UserProfile         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  answers             Answer[]
+  meal_recommendation MealRecommendation?
+
+  @@index([user_id, status, started_at])
+  @@map("question_sessions")
+}
+
+model Answer {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id     String   @db.Uuid
+  question_id    String   @db.Uuid
+  response       Boolean
+  response_time  Int
+  question_index Int
+  answered_at    DateTime @default(now())
+
+  // Relations
+  question_session QuestionSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@unique([session_id, question_index])
+  @@index([session_id])
+  @@map("answers")
+}
+
+model MealRecommendation {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  session_id      String       @unique @db.Uuid
+  meal_name       String
+  description     String
+  cuisine_genre   CuisineGenre
+  confidence      Float
+  reasoning_steps String[]
+  user_reaction   String?
+  created_at      DateTime     @default(now())
+
+  // Relations
+  question_session QuestionSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@map("meal_recommendations")
+}
+
+model MealHistory {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String       @db.Uuid
+  meal_name     String
+  cuisine_genre CuisineGenre
+  consumed_at   DateTime
+  session_id    String?      @db.Uuid
+  source        MealSource   @default(recommendation)
+  satisfaction  Int?
+  created_at    DateTime     @default(now())
+
+  // Relations
+  user_profile UserProfile @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, consumed_at])
+  @@index([cuisine_genre])
+  @@index([session_id])
+  @@map("meal_history")
+}

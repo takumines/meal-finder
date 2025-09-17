@@ -1,6 +1,18 @@
 {
   "permissions": {
-    "allow": ["mcp__context7__resolve-library-id", "mcp__context7__get-library-docs"],
+    "allow": [
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(mkdir:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(tree:*)",
+      "Bash(npm test:*)",
+      "Bash(bun run:*)",
+      "Bash(find:*)",
+      "Bash(bun test:*)",
+      "Bash(npx next build:*)",
+      "Bash(npm run build:*)"
+    ],
     "deny": [],
     "ask": []
   }
