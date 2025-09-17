@@ -36,7 +36,7 @@ describe("POST /api/sessions", () => {
       body: JSON.stringify(invalidRequest),
     });
 
-    expect([400, 401, 404, 500]).toContain(response.status);
+    expect([400, 404, 500]).toContain(response.status);
   });
 
   it("should return proper response structure when implemented", async () => {

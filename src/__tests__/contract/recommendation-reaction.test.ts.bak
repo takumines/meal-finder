@@ -35,7 +35,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
       },
     );
 
-    expect([400, 401, 404, 500]).toContain(response.status);
+    expect([400, 404, 500]).toContain(response.status);
   });
 
   it("should validate recommendationId format when implemented", async () => {
@@ -51,7 +51,7 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
       },
     );
 
-    expect([400, 401, 404, 500]).toContain(response.status);
+    expect([400, 404, 500]).toContain(response.status);
   });
 
   it("should validate reaction enum values when implemented", async () => {
@@ -70,27 +70,30 @@ describe("POST /api/recommendations/{recommendationId}/reaction", () => {
       },
     );
 
-    expect([400, 401, 404, 500]).toContain(response.status);
+    expect([400, 404, 500]).toContain(response.status);
   });
 
   it("should accept valid reaction values when implemented", async () => {
-    const reaction = "liked"; // Test with one value to avoid timeout
-    const request = { reaction };
-    const response = await fetch(
-      `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(request),
-      },
-    );
+    const validReactions = ["liked", "disliked", "saved"];
 
-    if (response.status === 200) {
-      expect(response.status).toBe(200);
-    } else {
-      expect([200, 401, 404, 500]).toContain(response.status);
+    for (const reaction of validReactions) {
+      const request = { reaction };
+      const response = await fetch(
+        `http://localhost:3000/api/recommendations/${recommendationId}/reaction`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        },
+      );
+
+      if (response.status === 200) {
+        expect(response.status).toBe(200);
+      } else {
+        expect([200, 401, 404, 500]).toContain(response.status);
+      }
     }
-  }, 10000);
+  });
 });
