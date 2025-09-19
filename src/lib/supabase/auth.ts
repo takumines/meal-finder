@@ -222,7 +222,7 @@ export class AuthManager {
   ) {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       callback(session?.user || null, session);
     });
 
@@ -282,7 +282,7 @@ export class AuthManager {
 
   private async createUserProfile(
     userId: string,
-    data: { firstName?: string; lastName?: string },
+    _data: { firstName?: string; lastName?: string },
   ) {
     try {
       const { error } = await supabase.from("user_profiles").insert({
@@ -419,7 +419,11 @@ export class AuthManager {
         return true;
       }
 
-      const expiresAt = new Date(session.expires_at! * 1000);
+      if (!session.expires_at) {
+        return true; // expires_atがない場合は期限切れとみなす
+      }
+
+      const expiresAt = new Date(session.expires_at * 1000);
       const now = new Date();
 
       return expiresAt <= now;

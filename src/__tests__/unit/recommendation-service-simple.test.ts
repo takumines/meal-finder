@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 // モックデータ
-const mockRecommendation = {
+const _mockRecommendation = {
   dish_name: "チキンカレー",
   description: "中辛のスパイシーなチキンカレーです",
   cuisine_genre: "INDIAN",
@@ -71,10 +71,7 @@ describe("Recommendation Service Functions - Simple Tests", () => {
     );
 
     const result = validateMealSource("RECOMMENDATION");
-    expect([
-      "RECOMMENDATION", 
-      "MANUAL_ENTRY",
-    ]).toContain(result);
+    expect(["RECOMMENDATION", "MANUAL_ENTRY"]).toContain(result);
   });
 
   it("should check budget fit", async () => {

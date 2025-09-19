@@ -1,22 +1,23 @@
-import { supabase } from "@/lib/supabase";
-import type {
-  MealHistory,
-  MealHistoryResponse
-} from "@/types";
+// NOTE: This file contains legacy Supabase code that doesn't match current Prisma schema
+// TODO: Refactor or remove when needed
 
-// Types
+/*
+import { supabase } from "@/lib/supabase";
+import type { MealHistory, MealHistoryResponse } from "@/types";
+
+// Types - TODO: Update to match current Prisma schema
 export interface CreateHistoryRequest {
   userId: string;
   sessionId: string;
   recommendationId: string;
-  reaction: "liked" | "disliked" | "saved";
+  satisfaction?: number; // Changed from reaction to satisfaction rating (1-5)
   notes?: string;
 }
 
 export interface HistoryFilters {
   startDate?: Date;
   endDate?: Date;
-  reactions?: Array<"liked" | "disliked" | "saved">;
+  satisfactionRange?: { min?: number; max?: number }; // Changed from reactions to satisfaction range
   cuisineGenres?: string[];
   limit?: number;
   offset?: number;
@@ -52,7 +53,7 @@ export interface ScoredMealHistory extends MealHistory {
 export const createHistory = async (
   request: CreateHistoryRequest,
 ): Promise<MealHistory> => {
-  const { userId, sessionId, recommendationId, reaction, notes } = request;
+  const { userId, sessionId, recommendationId, satisfaction, notes } = request;
 
   try {
     const { data, error } = await supabase
@@ -87,7 +88,7 @@ export const getUserHistory = async (
     startDate,
     endDate,
     reactions,
-    cuisineGenres,
+    cuisineGenres: _cuisineGenres,
     limit = 20,
     offset = 0,
   } = filters;
@@ -208,21 +209,21 @@ export const deleteHistory = async (
 
 // Analytics functions
 export const calculateReactionCounts = (
-  history: any[],
+  history: MealHistory[],
 ): {
   liked: number;
   disliked: number;
-  saved: number;
+  neutral: number;
 } => {
   return {
-    liked: history.filter((h) => h.reaction === "liked").length,
-    disliked: history.filter((h) => h.reaction === "disliked").length,
-    saved: history.filter((h) => h.reaction === "saved").length,
+    liked: history.filter((h) => h.satisfaction && h.satisfaction >= 4).length,
+    disliked: history.filter((h) => h.satisfaction && h.satisfaction <= 2).length,
+    neutral: history.filter((h) => h.satisfaction === 3).length,
   };
 };
 
 export const calculateTopCuisines = (
-  history: any[],
+  history: MealHistory[],
   limit: number = 5,
 ): Array<{ genre: string; count: number }> => {
   const cuisineCount: Record<string, number> = {};
@@ -240,25 +241,22 @@ export const calculateTopCuisines = (
     .slice(0, limit);
 };
 
-export const calculateAverageRating = (history: any[]): number => {
+export const calculateAverageRating = (history: MealHistory[]): number => {
   if (history.length === 0) return 0;
 
-  const ratingSum = history.reduce((sum, h) => {
-    switch (h.reaction) {
-      case "liked":
-        return sum + 1;
-      case "saved":
-        return sum + 0.5;
-      default:
-        return sum;
-    }
+  const ratingsWithValues = history.filter(h => h.satisfaction !== null);
+  
+  if (ratingsWithValues.length === 0) return 0;
+
+  const ratingSum = ratingsWithValues.reduce((sum, h) => {
+    return sum + (h.satisfaction || 0);
   }, 0);
 
-  return ratingSum / history.length;
+  return ratingSum / ratingsWithValues.length;
 };
 
 export const calculateRecentTrends = (
-  history: any[],
+  history: MealHistory[],
 ): {
   thisWeek: number;
   lastWeek: number;
@@ -327,7 +325,9 @@ export const getHistoryAnalytics = async (
 };
 
 // Pattern analysis functions
-export const analyzeTimeSlotPreferences = (likedMeals: any[]): string[] => {
+export const analyzeTimeSlotPreferences = (
+  likedMeals: MealHistory[],
+): string[] => {
   const timeSlotCount: Record<string, number> = {};
 
   likedMeals.forEach((meal) => {
@@ -342,7 +342,7 @@ export const analyzeTimeSlotPreferences = (likedMeals: any[]): string[] => {
     .map(([timeSlot]) => timeSlot);
 };
 
-export const analyzeFavoriteGenres = (likedMeals: any[]): string[] => {
+export const analyzeFavoriteGenres = (likedMeals: MealHistory[]): string[] => {
   const genreCount: Record<string, number> = {};
 
   likedMeals.forEach((meal) => {
@@ -357,7 +357,7 @@ export const analyzeFavoriteGenres = (likedMeals: any[]): string[] => {
     .map(([genre]) => genre);
 };
 
-export const calculateAverageBudget = (likedMeals: any[]): number => {
+export const calculateAverageBudget = (likedMeals: MealHistory[]): number => {
   const prices = likedMeals
     .map((meal) => meal.meal_recommendation?.estimated_price)
     .filter((price) => typeof price === "number") as number[];
@@ -368,7 +368,7 @@ export const calculateAverageBudget = (likedMeals: any[]): number => {
 };
 
 export const analyzeCommonIngredients = (
-  likedMeals: any[],
+  likedMeals: MealHistory[],
   limit: number = 10,
 ): string[] => {
   const ingredientCount: Record<string, number> = {};
@@ -388,7 +388,7 @@ export const analyzeCommonIngredients = (
 };
 
 export const analyzeSeasonalPreferences = (
-  likedMeals: any[],
+  likedMeals: MealHistory[],
 ): Record<string, string[]> => {
   const seasonalPreferences: Record<string, string[]> = {
     spring: [],
@@ -457,7 +457,10 @@ export const getMealPatterns = async (userId: string): Promise<MealPattern> => {
 };
 
 // Similarity functions
-export const calculateSimilarity = (current: any, target: any): number => {
+export const calculateSimilarity = (
+  current: MealHistory,
+  target: MealHistory,
+): number => {
   if (!current || !target) return 0;
 
   let score = 0;
@@ -614,3 +617,4 @@ export const historyService = {
   analyzeCommonIngredients,
   analyzeSeasonalPreferences,
 } as const;
+*/

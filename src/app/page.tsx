@@ -63,12 +63,14 @@ export default function Home() {
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
+                  type="button"
                   onClick={() => setShowLogin(true)}
                   className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-blue-700 transition-colors"
                 >
                   今すぐ始める
                 </button>
                 <button
+                  type="button"
                   onClick={handleTestLogin}
                   className="bg-green-600 text-white px-8 py-4 rounded-lg text-lg font-medium hover:bg-green-700 transition-colors"
                 >
@@ -106,6 +108,8 @@ export default function Home() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="アイデア"
                 >
                   <path
                     strokeLinecap="round"
@@ -130,6 +134,8 @@ export default function Home() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="質問"
                 >
                   <path
                     strokeLinecap="round"
@@ -154,6 +160,8 @@ export default function Home() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="食事推薦"
                 >
                   <path
                     strokeLinecap="round"
@@ -257,6 +265,7 @@ export default function Home() {
             </Link>
           ) : (
             <button
+              type="button"
               onClick={() => setShowLogin(true)}
               className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-medium hover:bg-gray-100 transition-colors"
             >

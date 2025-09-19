@@ -42,6 +42,7 @@ export function AnswerButtons({
       <div className="space-y-4">
         <div className="flex space-x-4">
           <button
+            type="button"
             onClick={() => handleAnswer(true)}
             disabled={disabled || loading}
             className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
@@ -57,6 +58,7 @@ export function AnswerButtons({
           </button>
 
           <button
+            type="button"
             onClick={() => handleAnswer(false)}
             disabled={disabled || loading}
             className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
@@ -77,6 +79,7 @@ export function AnswerButtons({
           <div>
             {!showNotesInput ? (
               <button
+                type="button"
                 onClick={handleAddNotes}
                 disabled={disabled || loading}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -94,6 +97,7 @@ export function AnswerButtons({
                 />
                 <div className="flex justify-end space-x-2">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowNotesInput(false);
                       setNotes("");
@@ -116,6 +120,7 @@ export function AnswerButtons({
     return (
       <div className="flex space-x-3">
         <button
+          type="button"
           onClick={() => handleAnswer(true)}
           disabled={disabled || loading}
           className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
@@ -124,6 +129,7 @@ export function AnswerButtons({
         </button>
 
         <button
+          type="button"
           onClick={() => handleAnswer(false)}
           disabled={disabled || loading}
           className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
@@ -140,10 +146,14 @@ export function AnswerButtons({
       <div className="space-y-6">
         {/* メモ入力エリア（常時表示） */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="detailed-notes"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             補足・メモ（任意）
           </label>
           <textarea
+            id="detailed-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="この質問について何か補足があれば入力してください"
@@ -155,6 +165,7 @@ export function AnswerButtons({
         {/* 回答ボタン */}
         <div className="grid grid-cols-2 gap-4">
           <button
+            type="button"
             onClick={() => handleAnswer(true)}
             disabled={disabled || loading}
             className="bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
@@ -166,6 +177,7 @@ export function AnswerButtons({
           </button>
 
           <button
+            type="button"
             onClick={() => handleAnswer(false)}
             disabled={disabled || loading}
             className="bg-red-600 text-white py-4 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
@@ -236,6 +248,7 @@ export function ScaleButtons({
           {scale.map((value) => (
             <button
               key={value}
+              type="button"
               onClick={() => setSelectedValue(value)}
               disabled={disabled || loading}
               className={`w-12 h-12 rounded-full border-2 font-medium transition-colors ${
@@ -253,10 +266,14 @@ export function ScaleButtons({
       {/* メモ入力 */}
       {showNotes && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="scale-notes"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             理由やコメント（任意）
           </label>
           <textarea
+            id="scale-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="選択した理由があれば入力してください"
@@ -268,6 +285,7 @@ export function ScaleButtons({
 
       {/* 送信ボタン */}
       <button
+        type="button"
         onClick={handleSubmit}
         disabled={disabled || loading || selectedValue === null}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
@@ -329,6 +347,7 @@ export function ChoiceButtons({
         {choices.map((choice) => (
           <button
             key={choice.value}
+            type="button"
             onClick={() => handleChoiceClick(choice.value)}
             disabled={disabled || loading}
             className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
@@ -367,10 +386,14 @@ export function ChoiceButtons({
       {/* メモ入力 */}
       {showNotes && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="choice-notes"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             補足・コメント（任意）
           </label>
           <textarea
+            id="choice-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="選択した理由や補足があれば入力してください"
@@ -382,6 +405,7 @@ export function ChoiceButtons({
 
       {/* 送信ボタン */}
       <button
+        type="button"
         onClick={handleSubmit}
         disabled={disabled || loading || selectedChoices.length === 0}
         className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"

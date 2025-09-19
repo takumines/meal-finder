@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 
+import path from "node:path";
 import react from "@vitejs/plugin-react";
-import path from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -18,11 +18,9 @@ export default defineConfig({
       "**/dist/**",
       "**/.{idea,git,cache,output,temp}/**",
       "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*",
-      ...(process.env.SKIP_INTEGRATION_TESTS ? [
-        "tests/e2e/**",
-        "tests/performance/**", 
-        "src/__tests__/contract/**"
-      ] : []),
+      ...(process.env.SKIP_INTEGRATION_TESTS
+        ? ["tests/e2e/**", "tests/performance/**", "src/__tests__/contract/**"]
+        : []),
     ],
   },
   resolve: {

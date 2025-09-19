@@ -12,7 +12,7 @@ describe("Question Service Functions - Simple Tests", () => {
   });
 
   it("should handle system questions", async () => {
-    const { getNextSystemQuestion, systemQuestions } = await import(
+    const { getNextSystemQuestion } = await import(
       "../../features/questions/services/question-service"
     );
 
@@ -34,7 +34,9 @@ describe("Question Service Functions - Simple Tests", () => {
     expect(result.isSystemQuestion).toBe(false);
     expect(result.category).toBe("PREFERENCE");
     expect(result.questionIndex).toBe(7); // answerCount + 1
-    expect(result.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    expect(result.id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
   });
 
   it("should validate question structure", async () => {

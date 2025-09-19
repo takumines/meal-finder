@@ -12,7 +12,7 @@ describe("E2E: Complete User Flow", () => {
       if (!response.ok && response.status !== 404) {
         throw new Error("Server not reachable");
       }
-    } catch (error) {
+    } catch (_error) {
       console.log("Server not available, E2E tests will expect errors");
     }
   });

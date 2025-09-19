@@ -38,7 +38,7 @@ export default function ProfilePage() {
     }
   }, [userProfile]);
 
-  const handleInputChange = (field: keyof UserProfile, value: any) => {
+  const handleInputChange = (field: keyof UserProfile, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -368,13 +368,23 @@ export default function ProfilePage() {
               </h2>
 
               <div>
-                <label htmlFor="allergies-group" className="block text-sm font-medium text-gray-700 mb-3">
+                <label
+                  htmlFor="allergies-group"
+                  className="block text-sm font-medium text-gray-700 mb-3"
+                >
                   アレルギー（複数選択可）
                 </label>
                 {isEditing ? (
-                  <div id="allergies-group" className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div
+                    id="allergies-group"
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3"
+                  >
                     {allergyOptions.map((option) => (
-                      <label key={option.value} htmlFor={`allergy-${option.value}`} className="flex items-center">
+                      <label
+                        key={option.value}
+                        htmlFor={`allergy-${option.value}`}
+                        className="flex items-center"
+                      >
                         <input
                           id={`allergy-${option.value}`}
                           type="checkbox"
@@ -471,6 +481,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-center">
                 <button
+                  type="button"
                   onClick={() => router.push("/history")}
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >

@@ -362,7 +362,7 @@ export const checkBudgetFit = (
 export const evaluateRecommendationFit = async (
   recommendation: GeneratedMealRecommendation,
   userProfile: UserProfile,
-  answers: Answer[],
+  _answers: Answer[],
 ): Promise<RecommendationFitEvaluation> => {
   let score = 0.5;
   const reasons: string[] = [];

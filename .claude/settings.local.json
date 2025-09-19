@@ -11,9 +11,19 @@
       "Bash(find:*)",
       "Bash(bun test:*)",
       "Bash(npx next build:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "mcp__serena__get_symbols_overview",
+      "Bash(bunx biome format:*)",
+      "Bash(npx biome format:*)",
+      "Bash(npx biome check:*)",
+      "mcp__serena__search_for_pattern",
+      "mcp__serena__check_onboarding_performed",
+      "Bash(SKIP_INTEGRATION_TESTS=false bun run test)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["serena"]
 }

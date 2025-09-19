@@ -13,7 +13,7 @@ import type {
 export interface DatabaseError {
   message: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface PaginationOptions {
@@ -614,7 +614,7 @@ export class DatabaseManager {
   }
 
   async executeTransaction<T>(
-    operations: (() => Promise<any>)[],
+    operations: (() => Promise<T>)[],
   ): Promise<QueryResult<T[]>> {
     try {
       // Supabaseには組み込みのトランザクション機能がないため、
@@ -650,7 +650,7 @@ export class DatabaseManager {
 
   async batchInsert<T>(
     table: string,
-    records: any[],
+    records: Record<string, unknown>[],
     batchSize: number = 100,
   ): Promise<QueryResult<T[]>> {
     try {

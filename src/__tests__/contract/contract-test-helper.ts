@@ -1,5 +1,3 @@
-import { afterAll, beforeAll } from "vitest";
-
 export const API_BASE_URL = "http://localhost:3000/api";
 
 export interface ContractTestResult {
@@ -11,7 +9,7 @@ export interface ContractTestResult {
 export async function testContractEndpoint(
   endpoint: string,
   method: "GET" | "POST" = "GET",
-  body?: any,
+  body?: unknown,
 ): Promise<ContractTestResult> {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -27,8 +25,12 @@ export async function testContractEndpoint(
       actualStatus: response.status,
       description: `API endpoint ${method} ${endpoint} returned ${response.status} (expected 404 for unimplemented endpoint)`,
     };
-  } catch (error: any) {
-    if (error.code === "ECONNREFUSED") {
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ECONNREFUSED"
+    ) {
       return {
         shouldBe404: true,
         actualStatus: 503, // Service unavailable

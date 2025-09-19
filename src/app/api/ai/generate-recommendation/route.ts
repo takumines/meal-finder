@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { generateRecommendation } from "@/features/meals/services/recommendation-service";
 import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
+import type { BudgetRange, CuisineGenre, SpiceLevel, TimeSlot } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,10 +66,11 @@ export async function POST(request: NextRequest) {
     const generatedRecommendation = await generateRecommendation({
       userProfile: {
         id: session.user_profile.id,
-        preferred_genres: session.user_profile.preferred_genres as any,
+        preferred_genres: session.user_profile
+          .preferred_genres as CuisineGenre[],
         allergies: session.user_profile.allergies as string[],
-        spice_preference: session.user_profile.spice_preference as any,
-        budget_range: session.user_profile.budget_range as any,
+        spice_preference: session.user_profile.spice_preference as SpiceLevel,
+        budget_range: session.user_profile.budget_range as BudgetRange,
         created_at: session.user_profile.created_at,
         updated_at: session.user_profile.updated_at,
       },
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
         question_index: answer.question_index,
         answered_at: answer.answered_at,
       })),
-      timeOfDay: session.time_of_day as any,
+      timeOfDay: session.time_of_day as TimeSlot,
       location: session.location
         ? JSON.parse(session.location as string)
         : undefined,

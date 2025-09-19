@@ -1,10 +1,5 @@
 import { openai } from "@/lib/openai";
-import type {
-  Answer,
-  QuestionCategory,
-  TimeSlot,
-  UserProfile,
-} from "@/types";
+import type { Answer, QuestionCategory, TimeSlot, UserProfile } from "@/types";
 
 // Types
 export interface Question {
@@ -190,6 +185,8 @@ export const generateAIQuestion = async (
     timeOfDay,
     location,
   });
+
+  console.log("AI Question Prompt:", prompt);
 
   const response = await openai.chat.completions.create({
     model: "gpt-4",

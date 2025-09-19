@@ -47,7 +47,7 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      let result;
+      let result: { error: Error | null };
 
       if (mode === "signup") {
         result = await signUp(email, password);
@@ -229,6 +229,7 @@ export function LoginButton({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}
     >
@@ -281,6 +282,7 @@ export function LogoutButton({
 
   return (
     <button
+      type="button"
       onClick={handleLogout}
       disabled={loading}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}

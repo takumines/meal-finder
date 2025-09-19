@@ -1,10 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
-import type {
-  UserProfile,
-  UserProfileUpdate,
-} from "@/types";
+import type { UserProfile, UserProfileUpdate } from "@/types";
 
 interface RouteContext {
   params: Promise<{
@@ -13,7 +10,7 @@ interface RouteContext {
 }
 
 // GET /api/users/[userId]/profile - ユーザープロファイルを取得
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const params = await context.params;
 
@@ -138,7 +135,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 // DELETE /api/users/[userId]/profile - ユーザープロファイルを削除
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const params = await context.params;
 

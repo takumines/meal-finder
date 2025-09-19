@@ -1,8 +1,8 @@
 // テスト用のfetchヘルパー
 export async function safeFetch(
-  url: string, 
-  options?: RequestInit
-): Promise<{ status: number; json?: () => Promise<any> }> {
+  url: string,
+  options?: RequestInit,
+): Promise<{ status: number; json?: () => Promise<unknown> }> {
   try {
     const response = await fetch(url, options);
     return {
@@ -11,10 +11,11 @@ export async function safeFetch(
     };
   } catch (error) {
     // 接続エラーの場合は500として扱う
-    if (error instanceof Error && (
-      error.message.includes('ECONNREFUSED') || 
-      error.message.includes('fetch failed')
-    )) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("ECONNREFUSED") ||
+        error.message.includes("fetch failed"))
+    ) {
       return { status: 500 };
     }
     throw error;

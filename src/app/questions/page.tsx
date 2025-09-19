@@ -2,10 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import {
-  RequireAuth,
-  useAuth,
-} from "@/features/auth/components/auth-provider";
+import { RequireAuth, useAuth } from "@/features/auth/components/auth-provider";
 import { RecommendationResult } from "@/features/meals/components/recommendation-result";
 import { QuestionFlow } from "@/features/questions/components/question-flow";
 import type { MealRecommendation } from "@/types/database";
@@ -51,7 +48,7 @@ export default function QuestionsPage() {
         credentials: "include",
         body: JSON.stringify({
           sessionId: completedSessionId,
-          userId: user!.id,
+          userId: user?.id,
         }),
       });
 
@@ -105,7 +102,7 @@ export default function QuestionsPage() {
           credentials: "include",
           body: JSON.stringify({
             reaction,
-            userId: user!.id,
+            userId: user?.id,
           }),
         },
       );

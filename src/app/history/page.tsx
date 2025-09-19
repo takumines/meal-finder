@@ -2,13 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { RequireAuth, useAuth } from "@/features/auth/components/auth-provider";
 import {
-  RequireAuth,
-  useAuth,
-} from "@/features/auth/components/auth-provider";
-import {
-  MealHistory,
   MealHistoryStats,
+  MealHistoryView,
 } from "@/features/meals/components/meal-history";
 import { RecommendationResult } from "@/features/meals/components/recommendation-result";
 import type { MealRecommendation } from "@/types/database";
@@ -43,7 +40,7 @@ export default function HistoryPage() {
           },
           body: JSON.stringify({
             reaction,
-            userId: user!.id,
+            userId: user?.id,
           }),
         },
       );
@@ -74,12 +71,14 @@ export default function HistoryPage() {
                 </div>
                 <div className="mt-4 md:mt-0 flex space-x-3">
                   <button
+                    type="button"
                     onClick={() => router.push("/questions")}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     新しい質問を開始
                   </button>
                   <button
+                    type="button"
                     onClick={() => router.push("/profile")}
                     className="bg-gray-200 text-gray-900 px-6 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                   >
@@ -103,7 +102,7 @@ export default function HistoryPage() {
               <h2 className="text-xl font-semibold text-gray-900">履歴一覧</h2>
             </div>
             <div className="p-6">
-              <MealHistory
+              <MealHistoryView
                 showFilters={true}
                 onRecommendationClick={handleRecommendationClick}
               />
@@ -182,6 +181,7 @@ export default function HistoryPage() {
                 質問に答えて、あなたにぴったりの食事を見つけましょう
               </p>
               <button
+                type="button"
                 onClick={() => router.push("/questions")}
                 className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium"
               >
@@ -201,6 +201,7 @@ export default function HistoryPage() {
                 レシピ詳細
               </h2>
               <button
+                type="button"
                 onClick={handleCloseModal}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -209,7 +210,10 @@ export default function HistoryPage() {
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
+                  role="img"
+                  aria-label="閉じる"
                 >
+                  <title>閉じる</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

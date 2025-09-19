@@ -34,7 +34,7 @@ export function RecommendationResult({
     }
   };
 
-  const formatPrice = (price: number) => {
+  const _formatPrice = (price: number) => {
     return new Intl.NumberFormat("ja-JP", {
       style: "currency",
       currency: "JPY",
@@ -56,8 +56,10 @@ export function RecommendationResult({
   const formatDate = (dateInput: string | Date) => {
     try {
       const date = new Date(dateInput);
-      return isNaN(date.getTime()) ? "不明" : date.toLocaleString("ja-JP");
-    } catch (error) {
+      return Number.isNaN(date.getTime())
+        ? "不明"
+        : date.toLocaleString("ja-JP");
+    } catch (_error) {
       return "不明";
     }
   };
@@ -85,6 +87,7 @@ export function RecommendationResult({
         </div>
         {onClose && (
           <button
+            type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
@@ -93,7 +96,10 @@ export function RecommendationResult({
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              role="img"
+              aria-label="閉じる"
             >
+              <title>閉じる</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -123,7 +129,10 @@ export function RecommendationResult({
             <span className="text-sm font-medium text-gray-700">推薦理由:</span>
             <ul className="mt-1 space-y-1">
               {recommendation.reasoning_steps.map((step, index) => (
-                <li key={index} className="text-gray-600 text-sm">
+                <li
+                  key={`reasoning-step-${index}-${step.substring(0, 10)}`}
+                  className="text-gray-600 text-sm"
+                >
                   • {step}
                 </li>
               ))}
@@ -135,6 +144,7 @@ export function RecommendationResult({
       {/* 詳細情報 */}
       <div className="mb-6">
         <button
+          type="button"
           onClick={() => setShowDetails(!showDetails)}
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
         >
@@ -144,7 +154,10 @@ export function RecommendationResult({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            role="img"
+            aria-label="詳細情報表示切り替え"
           >
+            <title>詳細情報表示切り替え</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -173,6 +186,7 @@ export function RecommendationResult({
       {showActions && (
         <div className="flex flex-wrap gap-3">
           <button
+            type="button"
             onClick={() => handleReaction("LIKE")}
             disabled={reactionLoading === "LIKE"}
             className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
@@ -186,6 +200,7 @@ export function RecommendationResult({
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>いいね</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -198,6 +213,7 @@ export function RecommendationResult({
           </button>
 
           <button
+            type="button"
             onClick={() => handleReaction("SAVE")}
             disabled={reactionLoading === "SAVE"}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
@@ -211,6 +227,7 @@ export function RecommendationResult({
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>保存</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -223,6 +240,7 @@ export function RecommendationResult({
           </button>
 
           <button
+            type="button"
             onClick={() => handleReaction("DISLIKE")}
             disabled={reactionLoading === "DISLIKE"}
             className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
@@ -236,6 +254,7 @@ export function RecommendationResult({
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>いまいち</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -249,6 +268,7 @@ export function RecommendationResult({
 
           {onRetry && (
             <button
+              type="button"
               onClick={onRetry}
               className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
             >
@@ -257,7 +277,10 @@ export function RecommendationResult({
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                role="img"
+                aria-label="再試行"
               >
+                <title>再試行</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -305,7 +328,10 @@ export function RecommendationList({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            role="img"
+            aria-label="推薦結果なし"
           >
+            <title>推薦結果なし</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -317,6 +343,7 @@ export function RecommendationList({
         <p className="text-lg text-gray-600 mb-4">まだ推薦結果がありません</p>
         {onRetry && (
           <button
+            type="button"
             onClick={onRetry}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >

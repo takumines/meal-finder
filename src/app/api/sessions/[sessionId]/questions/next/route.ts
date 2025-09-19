@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 import { generateQuestion } from "@/features/questions/services/question-service";
 import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
+import type { BudgetRange, CuisineGenre, SpiceLevel, TimeSlot } from "@/types";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> },
 ) {
   try {
@@ -82,10 +83,10 @@ export async function GET(
     const question = await generateQuestion({
       userProfile: {
         id: userProfile.id,
-        preferred_genres: userProfile.preferred_genres as any,
+        preferred_genres: userProfile.preferred_genres as CuisineGenre[],
         allergies: userProfile.allergies as string[],
-        spice_preference: userProfile.spice_preference as any,
-        budget_range: userProfile.budget_range as any,
+        spice_preference: userProfile.spice_preference as SpiceLevel,
+        budget_range: userProfile.budget_range as BudgetRange,
         created_at: userProfile.created_at,
         updated_at: userProfile.updated_at,
       },
@@ -98,7 +99,7 @@ export async function GET(
         question_index: answer.question_index,
         answered_at: answer.answered_at,
       })),
-      timeOfDay: session.time_of_day as any,
+      timeOfDay: session.time_of_day as TimeSlot,
       location: session.location
         ? JSON.parse(session.location as string)
         : undefined,

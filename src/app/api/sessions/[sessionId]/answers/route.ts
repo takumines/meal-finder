@@ -177,7 +177,7 @@ export async function POST(
 
 // GET /api/sessions/[sessionId]/answers - セッションの回答一覧を取得
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> },
 ) {
   try {

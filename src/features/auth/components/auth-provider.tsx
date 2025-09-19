@@ -1,7 +1,13 @@
 "use client";
 
 import type { Session, User } from "@supabase/supabase-js";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { UserProfile } from "@/types/database";
 
@@ -31,6 +37,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
+
+  // ユーザープロファイルの読み込み
+  const loadUserProfile = useCallback(async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/profile`);
+      if (response.ok) {
+        const profile = await response.json();
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+    }
+  }, []);
 
   // Supabaseセッションの監視
   useEffect(() => {
@@ -66,7 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // 認証状態の変更を監視
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -80,20 +99,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  // ユーザープロファイルの読み込み
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const response = await fetch(`/api/users/${userId}/profile`);
-      if (response.ok) {
-        const profile = await response.json();
-        setUserProfile(profile);
-      }
-    } catch (error) {
-      console.error("Failed to load user profile:", error);
-    }
-  };
+  }, [
+    loadUserProfile,
+    supabase.auth.getSession,
+    supabase.auth.onAuthStateChange,
+  ]);
 
   // サインイン
   const signIn = async (email: string, password: string) => {
