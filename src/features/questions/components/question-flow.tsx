@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import type { Answer, Question, QuestionSession } from "@/types/database";
 
@@ -33,36 +33,110 @@ export function QuestionFlow({
   const [location, setLocation] = useState<Location | null>(null);
   const [progress, setProgress] = useState({ current: 0, total: 10 });
 
-  // 位置情報の取得
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.warn("位置情報の取得に失敗しました:", error);
-        },
-      );
-    }
+  // 時間帯の判定
+  const getTimeOfDay = useCallback(() => {
+    const hour = new Date().getHours();
+    if (hour < 11) return "BREAKFAST";
+    if (hour < 17) return "LUNCH";
+    return "DINNER";
   }, []);
 
-  // セッションの初期化または読み込み
-  useEffect(() => {
-    if (!user) return;
+  // セッションの完了
+  const completeSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        // セッションの状態を完了に更新
+        const response = await fetch(`/api/sessions/${sessionId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            status: "COMPLETED",
+            completed_at: new Date().toISOString(),
+          }),
+        });
 
-    if (sessionId) {
-      loadExistingSession(sessionId);
-    } else {
-      createNewSession();
-    }
-  }, [user, sessionId]);
+        if (response.ok) {
+          // レコメンデーション生成API呼び出し
+          try {
+            const recResponse = await fetch("/api/ai/generate-recommendation", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                sessionId: sessionId,
+              }),
+            });
+
+            if (recResponse.ok) {
+              console.log("レコメンデーション生成完了");
+            } else {
+              console.warn(
+                "レコメンデーション生成に失敗しましたが、セッションは完了しました",
+              );
+            }
+          } catch (recError) {
+            console.error("レコメンデーション生成エラー:", recError);
+          }
+
+          onComplete?.(sessionId);
+        }
+      } catch (error) {
+        console.error("セッション完了エラー:", error);
+      }
+    },
+    [onComplete],
+  );
+
+  // 次の質問の読み込み
+  const loadNextQuestion = useCallback(
+    async (sessionId: string) => {
+      try {
+        const response = await fetch(
+          `/api/sessions/${sessionId}/questions/next`,
+          {
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            // 質問が終了した場合
+            await completeSession(sessionId);
+            return;
+          }
+          if (response.status === 400) {
+            // 最大質問数に達した場合の処理
+            try {
+              const errorData = await response.json();
+              if (errorData.shouldGenerateRecommendation) {
+                await completeSession(sessionId);
+                return;
+              }
+            } catch (_e) {
+              // JSON解析に失敗した場合は通常エラーとして処理
+            }
+          }
+          throw new Error("質問の読み込みに失敗しました");
+        }
+
+        const result = await response.json();
+        const question = result.data.question;
+        setCurrentQuestion(question);
+      } catch (error) {
+        console.error("質問読み込みエラー:", error);
+        onError?.("質問の読み込みに失敗しました");
+      }
+    },
+    [onError, completeSession],
+  );
 
   // 新しいセッションの作成
-  const createNewSession = async () => {
+  const createNewSession = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -93,86 +167,78 @@ export function QuestionFlow({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, location, onError, loadNextQuestion, getTimeOfDay]);
 
   // 既存セッションの読み込み
-  const loadExistingSession = async (sessionId: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}`, {
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("セッションの読み込みに失敗しました");
-      }
-
-      const result = await response.json();
-      const session = result.data;
-      setCurrentSession(session);
-      setAnswers(session.answers || []);
-      setProgress({
-        current: session.answers?.length || 0,
-        total: 10,
-      });
-
-      // セッションが完了している場合
-      if (session.status !== "ACTIVE") {
-        onComplete?.(sessionId);
-        return;
-      }
-
-      await loadNextQuestion(sessionId);
-    } catch (error) {
-      console.error("セッション読み込みエラー:", error);
-      onError?.("セッションの読み込みに失敗しました");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 次の質問の読み込み
-  const loadNextQuestion = async (sessionId: string) => {
-    try {
-      const response = await fetch(
-        `/api/sessions/${sessionId}/questions/next`,
-        {
+  const loadExistingSession = useCallback(
+    async (sessionId: string) => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/sessions/${sessionId}`, {
           credentials: "include",
-        },
-      );
+        });
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          // 質問が終了した場合
-          await completeSession(sessionId);
+        if (!response.ok) {
+          throw new Error("セッションの読み込みに失敗しました");
+        }
+
+        const result = await response.json();
+        const session = result.data;
+        console.log("Loaded existing session:", session);
+        setCurrentSession(session);
+        setAnswers(session.answers || []);
+        setProgress({
+          current: session.answers?.length || 0,
+          total: 10,
+        });
+
+        // セッションが完了している場合
+        if (session.status !== "ACTIVE") {
+          onComplete?.(sessionId);
           return;
         }
-        if (response.status === 400) {
-          // 最大質問数に達した場合の処理
-          try {
-            const errorData = await response.json();
-            if (errorData.shouldGenerateRecommendation) {
-              await completeSession(sessionId);
-              return;
-            }
-          } catch (e) {
-            // JSON解析に失敗した場合は通常エラーとして処理
-          }
-        }
-        throw new Error("質問の読み込みに失敗しました");
-      }
 
-      const result = await response.json();
-      const question = result.data.question;
-      setCurrentQuestion(question);
-    } catch (error) {
-      console.error("質問読み込みエラー:", error);
-      onError?.("質問の読み込みに失敗しました");
+        await loadNextQuestion(sessionId);
+      } catch (error) {
+        console.error("セッション読み込みエラー:", error);
+        onError?.("セッションの読み込みに失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onComplete, onError, loadNextQuestion],
+  );
+
+  // 位置情報の取得
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn("位置情報の取得に失敗しました:", error);
+        },
+      );
     }
-  };
+  }, []);
+
+  // セッションの初期化または読み込み
+  useEffect(() => {
+    if (!user) return;
+
+    if (sessionId) {
+      loadExistingSession(sessionId);
+    } else {
+      createNewSession();
+    }
+  }, [user, sessionId, createNewSession, loadExistingSession]);
 
   // 回答の送信
-  const submitAnswer = async (response: boolean, notes?: string) => {
+  const submitAnswer = async (response: boolean, _notes?: string) => {
     if (!currentSession || !currentQuestion) return;
 
     setSubmittingAnswer(true);
@@ -194,7 +260,8 @@ export function QuestionFlow({
         throw new Error("回答の送信に失敗しました");
       }
 
-      const answer = await res.json();
+      const result = await res.json();
+      const answer = result.data.answer;
       const newAnswers = [...answers, answer];
       setAnswers(newAnswers);
       setProgress({
@@ -210,62 +277,6 @@ export function QuestionFlow({
     } finally {
       setSubmittingAnswer(false);
     }
-  };
-
-  // セッションの完了
-  const completeSession = async (sessionId: string) => {
-    try {
-      // セッションの状態を完了に更新
-      const response = await fetch(`/api/sessions/${sessionId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          status: "COMPLETED",
-          completed_at: new Date().toISOString(),
-        }),
-      });
-
-      if (response.ok) {
-        // レコメンデーション生成API呼び出し
-        try {
-          const recResponse = await fetch("/api/ai/generate-recommendation", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              sessionId: sessionId,
-            }),
-          });
-
-          if (recResponse.ok) {
-            console.log("レコメンデーション生成完了");
-          } else {
-            console.warn(
-              "レコメンデーション生成に失敗しましたが、セッションは完了しました",
-            );
-          }
-        } catch (recError) {
-          console.error("レコメンデーション生成エラー:", recError);
-        }
-
-        onComplete?.(sessionId);
-      }
-    } catch (error) {
-      console.error("セッション完了エラー:", error);
-    }
-  };
-
-  // 時間帯の判定
-  const getTimeOfDay = () => {
-    const hour = new Date().getHours();
-    if (hour < 11) return "BREAKFAST";
-    if (hour < 17) return "LUNCH";
-    return "DINNER";
   };
 
   if (!user) {
@@ -331,6 +342,7 @@ export function QuestionFlow({
         {/* 回答ボタン */}
         <div className="flex space-x-4">
           <button
+            type="button"
             onClick={() => submitAnswer(true)}
             disabled={submittingAnswer}
             className="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
@@ -339,6 +351,7 @@ export function QuestionFlow({
           </button>
 
           <button
+            type="button"
             onClick={() => submitAnswer(false)}
             disabled={submittingAnswer}
             className="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
@@ -353,19 +366,21 @@ export function QuestionFlow({
         <div className="bg-gray-50 rounded-lg p-4">
           <h3 className="text-sm font-medium text-gray-700 mb-3">回答履歴</h3>
           <div className="flex flex-wrap gap-2">
-            {answers.slice(-5).map((answer, index) => (
-              <div
-                key={answer.id}
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  answer.response
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                Q{answers.length - 4 + index}:{" "}
-                {answer.response ? "はい" : "いいえ"}
-              </div>
-            ))}
+            {answers.slice(-5).map((answer, index) => {
+              const actualIndex = answers.length - 5 + index;
+              return (
+                <div
+                  key={`answer-${actualIndex}-${answer.id || index}`}
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    answer.response
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  Q{actualIndex + 1}: {answer.response ? "はい" : "いいえ"}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
