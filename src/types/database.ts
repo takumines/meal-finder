@@ -56,8 +56,19 @@ export interface QuestionSessionWithRelations extends QuestionSession {
   meal_recommendation?: MealRecommendation;
 }
 
+export interface MealHistoryItem {
+  id: string;
+  userId: string;
+  mealName: string;
+  cuisineGenre: string;
+  consumedAt: Date;
+  source: string;
+  satisfaction: number | null;
+  createdAt: Date;
+}
+
 export interface MealHistoryResponse {
-  items: MealHistory[];
+  items: MealHistoryItem[];
   total: number;
   hasMore: boolean;
 }

@@ -1,22 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import type { MealHistory, MealRecommendation } from "@/types/database";
+import type {
+  MealHistoryItem,
+  MealHistoryResponse,
+  MealRecommendation,
+} from "@/types/database";
 
-interface MealHistoryProps {
+interface MealHistoryViewProps {
   limit?: number;
   showFilters?: boolean;
   onRecommendationClick?: (recommendation: MealRecommendation) => void;
 }
 
-export function MealHistory({
+export function MealHistoryView({
   limit,
   showFilters = true,
   onRecommendationClick,
-}: MealHistoryProps) {
+}: MealHistoryViewProps) {
   const { user } = useAuth();
-  const [history, setHistory] = useState<MealHistory[]>([]);
+  const [history, setHistory] = useState<MealHistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
@@ -25,22 +29,21 @@ export function MealHistory({
     cuisineType: "all",
   });
 
-  useEffect(() => {
-    if (user) {
-      loadHistory();
-    }
-  }, [user, filters]);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const queryParams = new URLSearchParams({
-        userId: user!.id,
+      const params: Record<string, string> = {
+        userId: user?.id || "",
         ...filters,
-        ...(limit && { limit: limit.toString() }),
-      });
+      };
+
+      if (limit) {
+        params.limit = limit.toString();
+      }
+
+      const queryParams = new URLSearchParams(params);
 
       const response = await fetch(`/api/history?${queryParams}`);
 
@@ -49,6 +52,7 @@ export function MealHistory({
       }
 
       const data = await response.json();
+      console.log("History load success:", data);
       setHistory(data);
     } catch (error) {
       console.error("History load error:", error);
@@ -56,7 +60,13 @@ export function MealHistory({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, filters, limit]);
+
+  useEffect(() => {
+    if (user) {
+      loadHistory();
+    }
+  }, [user, loadHistory]);
 
   const handleRatingChange = async (historyId: string, rating: number) => {
     try {
@@ -77,7 +87,7 @@ export function MealHistory({
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const _formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ja-JP", {
       year: "numeric",
       month: "short",
@@ -87,12 +97,12 @@ export function MealHistory({
     });
   };
 
-  const getRatingStars = (rating: number | null) => {
+  const _getRatingStars = (rating: number | null) => {
     if (!rating) return "未評価";
 
     return Array.from({ length: 5 }, (_, i) => (
       <span
-        key={i}
+        key={`star-${i}-${rating || 0}`}
         className={`text-lg ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
       >
         ★
@@ -122,6 +132,7 @@ export function MealHistory({
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
         {error}
         <button
+          type="button"
           onClick={loadHistory}
           className="ml-4 text-red-600 hover:text-red-800 font-medium"
         >
@@ -139,10 +150,14 @@ export function MealHistory({
           <h3 className="text-lg font-medium text-gray-900 mb-4">フィルター</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="dateRange"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 期間
               </label>
               <select
+                id="dateRange"
                 value={filters.dateRange}
                 onChange={(e) =>
                   setFilters({ ...filters, dateRange: e.target.value })
@@ -157,10 +172,14 @@ export function MealHistory({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="rating"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 評価
               </label>
               <select
+                id="rating"
                 value={filters.rating}
                 onChange={(e) =>
                   setFilters({ ...filters, rating: e.target.value })
@@ -175,10 +194,14 @@ export function MealHistory({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="cuisineType"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 料理の種類
               </label>
               <select
+                id="cuisineType"
                 value={filters.cuisineType}
                 onChange={(e) =>
                   setFilters({ ...filters, cuisineType: e.target.value })
@@ -199,7 +222,7 @@ export function MealHistory({
       )}
 
       {/* 履歴一覧 */}
-      {history.length === 0 ? (
+      {!history || history.items.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-500 mb-4">
             <svg
@@ -207,7 +230,10 @@ export function MealHistory({
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              role="img"
+              aria-label="履歴なし"
             >
+              <title>履歴なし</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -223,7 +249,7 @@ export function MealHistory({
         </div>
       ) : (
         <div className="space-y-4">
-          {history.map((item) => (
+          {history.items.map((item) => (
             <MealHistoryCard
               key={item.id}
               historyItem={item}
@@ -239,7 +265,7 @@ export function MealHistory({
 
 // 個別の履歴カードコンポーネント
 interface MealHistoryCardProps {
-  historyItem: MealHistory;
+  historyItem: MealHistoryItem;
   onRatingChange?: (historyId: string, rating: number) => void;
   onRecommendationClick?: (recommendation: MealRecommendation) => void;
 }
@@ -247,7 +273,7 @@ interface MealHistoryCardProps {
 function MealHistoryCard({
   historyItem,
   onRatingChange,
-  onRecommendationClick,
+  onRecommendationClick: _onRecommendationClick,
 }: MealHistoryCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [rating, setRating] = useState(historyItem.satisfaction || 0);
@@ -273,14 +299,14 @@ function MealHistoryCard({
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            {historyItem.meal_name}
+            {historyItem.mealName}
           </h3>
           <p className="text-sm text-gray-500">
-            {formatDate(historyItem.consumed_at.toString())}
+            {formatDate(historyItem.consumedAt.toString())}
           </p>
         </div>
         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-          {historyItem.cuisine_genre}
+          {historyItem.cuisineGenre}
         </span>
       </div>
 
@@ -293,7 +319,8 @@ function MealHistoryCard({
           <div className="flex">
             {Array.from({ length: 5 }, (_, i) => (
               <button
-                key={i}
+                key={`rating-star-${i}-${rating}`}
+                type="button"
                 onClick={() => handleRatingClick(i + 1)}
                 className={`text-lg hover:scale-110 transition-transform ${
                   i < rating
@@ -313,6 +340,7 @@ function MealHistoryCard({
 
       {/* 詳細表示ボタン */}
       <button
+        type="button"
         onClick={() => setShowDetails(!showDetails)}
         className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
       >
@@ -322,7 +350,10 @@ function MealHistoryCard({
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          role="img"
+          aria-label="詳細表示切り替え"
         >
+          <title>詳細表示切り替え</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -345,6 +376,7 @@ function MealHistoryCard({
           {/* アクションボタン */}
           <div className="flex space-x-3 pt-2">
             <button
+              type="button"
               onClick={() => {
                 /* 再推薦機能 */
               }}
@@ -364,15 +396,18 @@ interface MealHistoryStatsProps {
   userId: string;
 }
 
+interface StatsData {
+  totalMeals: number;
+  averageRating: number;
+  favoriteCuisine: string;
+  thisMonthCount: number;
+}
+
 export function MealHistoryStats({ userId }: MealHistoryStatsProps) {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStats();
-  }, [userId]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const response = await fetch(`/api/history/stats?userId=${userId}`);
       if (response.ok) {
@@ -384,7 +419,11 @@ export function MealHistoryStats({ userId }: MealHistoryStatsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   if (loading) return null;
   if (!stats) return null;
