@@ -92,7 +92,7 @@ export function AnswerButtons({
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="補足があれば入力してください（任意）"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 text-gray-900"
                   rows={3}
                 />
                 <div className="flex justify-end space-x-2">
@@ -157,7 +157,7 @@ export function AnswerButtons({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="この質問について何か補足があれば入力してください"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 text-gray-900"
             rows={3}
           />
         </div>
@@ -277,7 +277,7 @@ export function ScaleButtons({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="選択した理由があれば入力してください"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 text-gray-900"
             rows={2}
           />
         </div>
@@ -397,7 +397,7 @@ export function ChoiceButtons({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="選択した理由や補足があれば入力してください"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-500 text-gray-900"
             rows={2}
           />
         </div>
