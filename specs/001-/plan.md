@@ -1,4 +1,4 @@
-# Implementation Plan: 食事決定アプリ (MealFinder)
+# Implementation Plan: 食事決定アプリ (何食べる？)
 
 **Branch**: `001-` | **Date**: 2025-09-13 | **Spec**: /Users/takumines/dev/React/nantaberu/specs/001-/spec.md
 **Input**: Feature specification from /Users/takumines/dev/React/nantaberu/specs/001-/spec.md

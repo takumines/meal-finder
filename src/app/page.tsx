@@ -93,7 +93,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              MealFinderの特徴
+              何食べる？の特徴
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               AIと対話しながら、あなただけの食事体験を作りましょう

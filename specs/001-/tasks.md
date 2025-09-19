@@ -1,4 +1,4 @@
-# Tasks: 食事決定アプリ (MealFinder)
+# Tasks: 食事決定アプリ (何食べる？)
 
 **Input**: Design documents from `/specs/001-/`
 **Prerequisites**: plan.md (required), research.md, data-model.md, contracts/api-spec.yaml, quickstart.md

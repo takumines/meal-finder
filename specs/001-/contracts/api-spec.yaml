@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: MealFinder API - Prisma + Supabase統合
+  title: 何食べる？ API - Prisma + Supabase統合
   description: 食事決定アプリのAPI仕様（Prisma DB + Supabase Auth + カスタムAPI）
   version: 1.0.0
   contact:
-    name: MealFinder Team
+    name: 何食べる？ Team
 servers:
   - url: http://localhost:3000/api
     description: Development server

@@ -9,13 +9,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MealFinder - あなたにぴったりの食事を見つけよう",
+  title: "何食べる？ - あなたにぴったりの食事を見つけよう",
   description:
     "AIが質問を通してあなたの好みを学習し、最適な食事を提案するアプリです。",
   keywords: ["食事", "レシピ", "AI", "推薦", "料理"],
-  authors: [{ name: "MealFinder Team" }],
+  authors: [{ name: "何食べる？ Team" }],
   openGraph: {
-    title: "MealFinder",
+    title: "何食べる？",
     description:
       "AIが質問を通してあなたの好みを学習し、最適な食事を提案するアプリです。",
     type: "website",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MealFinder",
+    title: "何食べる？",
     description:
       "AIが質問を通してあなたの好みを学習し、最適な食事を提案するアプリです。",
   },
@@ -45,7 +45,7 @@ export default function RootLayout({
                 <div className="flex justify-between items-center h-16">
                   <div className="flex items-center">
                     <h1 className="text-2xl font-bold text-blue-600">
-                      MealFinder
+                      何食べる？
                     </h1>
                   </div>
                   <nav className="hidden md:flex space-x-8">
@@ -86,7 +86,7 @@ export default function RootLayout({
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div>
-                    <h3 className="text-lg font-semibold mb-4">MealFinder</h3>
+                    <h3 className="text-lg font-semibold mb-4">何食べる？</h3>
                     <p className="text-gray-300 text-sm">
                       AIがあなたの好みを学習し、最適な食事を提案します。
                     </p>
@@ -148,7 +148,7 @@ export default function RootLayout({
                   </div>
                 </div>
                 <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-300">
-                  <p>&copy; 2025 MealFinder. All rights reserved.</p>
+                  <p>&copy; 2025 何食べる？. All rights reserved.</p>
                 </div>
               </div>
             </footer>
