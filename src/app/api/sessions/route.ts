@@ -1,3 +1,4 @@
+import type { SessionStatus } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -128,14 +129,16 @@ export async function GET(request: NextRequest) {
 
     // クエリパラメータを取得
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const offset = parseInt(searchParams.get("offset") || "0");
-    const is_active = searchParams.get("is_active");
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const offset = parseInt(searchParams.get("offset") || "0", 10);
+    const status = searchParams.get("status");
 
     // セッション一覧を取得
-    const whereCondition: any = { user_id: user.id };
-    if (is_active !== null) {
-      whereCondition.is_active = is_active === "true";
+    const whereCondition: { user_id: string; status?: SessionStatus } = {
+      user_id: user.id,
+    };
+    if (status) {
+      whereCondition.status = status as SessionStatus;
     }
 
     const sessions = await prisma.questionSession.findMany({

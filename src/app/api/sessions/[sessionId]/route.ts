@@ -1,9 +1,10 @@
+import type { SessionStatus } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> },
 ) {
   try {
@@ -106,7 +107,7 @@ export async function PUT(
 
     const { sessionId } = await params;
     const body = await request.json();
-    const { is_active, completed_at, status } = body;
+    const { completed_at, status } = body;
 
     // セッションIDの検証
     if (!sessionId) {
@@ -129,14 +130,13 @@ export async function PUT(
     }
 
     // セッションを更新
-    const updateData: any = {};
-
-    if (typeof is_active === "boolean") {
-      updateData.is_active = is_active;
-    }
+    const updateData: {
+      status?: SessionStatus;
+      completed_at?: Date;
+    } = {};
 
     if (status) {
-      updateData.status = status;
+      updateData.status = status as SessionStatus;
     }
 
     if (completed_at) {
@@ -168,7 +168,7 @@ export async function PUT(
 
 // DELETE /api/sessions/[sessionId] - セッション削除
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> },
 ) {
   try {
